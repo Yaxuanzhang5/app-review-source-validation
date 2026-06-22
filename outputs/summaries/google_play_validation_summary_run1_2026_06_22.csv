@@ -1,0 +1,4 @@
+app_name,review_count,unique_review_ids,oldest_review,newest_review,avg_rating,reviews_with_text,reviews_with_app_version,reviews_with_review_created_version,reviews_with_developer_reply,duplicate_count
+Spotify,2000,2000,2026-06-18 13:06:48,2026-06-21 02:49:56,3.561,2000,1690,1690,298,0
+TikTok,2000,2000,2026-06-18 08:14:37,2026-06-21 02:49:34,3.97,2000,1290,1290,1652,0
+YouTube,2000,2000,2026-06-19 14:22:31,2026-06-21 02:48:36,3.6435,2000,1959,1959,0,0

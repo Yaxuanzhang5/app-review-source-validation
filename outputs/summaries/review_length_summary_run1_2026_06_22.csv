@@ -1,0 +1,7 @@
+source,app_name,avg_char_length,median_char_length,avg_word_length,median_word_length
+google_play,Spotify,86.908,39.0,16.5885,8.0
+google_play,TikTok,53.517,20.0,10.4105,4.0
+google_play,YouTube,60.341,19.0,11.337,4.0
+ios_app_store,Spotify,96.1556,52.0,18.4048,10.0
+ios_app_store,TikTok,176.7205,125.0,33.743,24.0
+ios_app_store,YouTube,139.312,72.0,25.5508,14.0
