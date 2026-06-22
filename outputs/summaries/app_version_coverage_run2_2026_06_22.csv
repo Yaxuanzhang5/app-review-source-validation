@@ -1,0 +1,7 @@
+source,app_name,total_reviews,reviews_with_app_version,app_version_coverage_rate
+google_play,Spotify,2000,1681,0.8405
+google_play,TikTok,2000,1256,0.628
+google_play,YouTube,2000,1965,0.9825
+ios_app_store,Spotify,2500,2500,1.0
+ios_app_store,TikTok,2000,2000,1.0
+ios_app_store,YouTube,2500,2500,1.0

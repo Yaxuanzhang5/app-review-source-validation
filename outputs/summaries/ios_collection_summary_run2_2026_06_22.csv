@@ -1,0 +1,16 @@
+source,app_name,ios_id,country,pages_requested,collected_count,empty_pages,failed_pages,runtime_seconds
+ios_app_store,YouTube,544007664,us,10,500,0,0,7.19
+ios_app_store,YouTube,544007664,gb,10,500,0,0,5.42
+ios_app_store,YouTube,544007664,ca,10,500,0,0,5.48
+ios_app_store,YouTube,544007664,au,10,500,0,0,5.87
+ios_app_store,YouTube,544007664,in,10,500,0,0,5.1
+ios_app_store,TikTok,835599320,us,10,500,0,0,7.92
+ios_app_store,TikTok,835599320,gb,10,500,0,0,6.38
+ios_app_store,TikTok,835599320,ca,10,500,0,0,5.52
+ios_app_store,TikTok,835599320,au,10,500,0,0,5.61
+ios_app_store,TikTok,835599320,in,10,0,10,0,1.48
+ios_app_store,Spotify,324684580,us,10,500,0,0,7.74
+ios_app_store,Spotify,324684580,gb,10,500,0,0,6.08
+ios_app_store,Spotify,324684580,ca,10,500,0,0,5.43
+ios_app_store,Spotify,324684580,au,10,500,0,0,5.22
+ios_app_store,Spotify,324684580,in,10,500,0,0,4.81

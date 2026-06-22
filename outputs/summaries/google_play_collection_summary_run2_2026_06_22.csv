@@ -1,0 +1,4 @@
+source,app_name,app_package,country,language,target_count,collected_count,failed,error_message,runtime_seconds
+google_play,YouTube,com.google.android.youtube,us,en,2000,2000,False,,5.11
+google_play,TikTok,com.zhiliaoapp.musically,us,en,2000,2000,False,,5.4
+google_play,Spotify,com.spotify.music,us,en,2000,2000,False,,4.66
