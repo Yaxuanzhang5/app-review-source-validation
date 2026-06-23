@@ -1,0 +1,7 @@
+comparison_pair,source,app_name,previous_run_count,current_run_count,new_reviews_in_current_run,overlap_with_previous_run,current_run_overlap_rate,previous_run_newest_review,current_run_newest_review,schema_same
+run1_vs_run2,google_play,YouTube,2000,2000,1238,762,0.381,2026-06-21 02:48:36,2026-06-21 21:07:36,True
+run1_vs_run2,google_play,TikTok,2000,2000,620,1380,0.69,2026-06-21 02:49:34,2026-06-21 21:16:36,True
+run1_vs_run2,google_play,Spotify,2000,2000,695,1305,0.6525,2026-06-21 02:49:56,2026-06-21 21:00:03,True
+run2_vs_run3,google_play,YouTube,2000,2000,1402,598,0.299,2026-06-21 21:07:36,2026-06-22 18:36:47,True
+run2_vs_run3,google_play,TikTok,2000,2000,596,1404,0.702,2026-06-21 21:16:36,2026-06-22 18:37:36,True
+run2_vs_run3,google_play,Spotify,2000,2000,694,1306,0.653,2026-06-21 21:00:03,2026-06-22 18:36:20,True

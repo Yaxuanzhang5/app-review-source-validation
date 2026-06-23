@@ -1,0 +1,4 @@
+source,app_name,run2_count,run3_count,new_reviews_in_run3,overlap_with_run2,run3_overlap_rate,run2_newest_review,run3_newest_review,schema_same
+google_play,YouTube,2000,2000,1402,598,0.299,2026-06-21 21:07:36,2026-06-22 18:36:47,True
+google_play,TikTok,2000,2000,596,1404,0.702,2026-06-21 21:16:36,2026-06-22 18:37:36,True
+google_play,Spotify,2000,2000,694,1306,0.653,2026-06-21 21:00:03,2026-06-22 18:36:20,True

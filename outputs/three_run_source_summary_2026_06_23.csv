@@ -1,0 +1,7 @@
+run,source,total_reviews,unique_review_keys,duplicate_rows,duplicate_rate,failed_requests_or_apps,main_limitation
+run1,google_play,6000,6000,0,0.0,0,Needs repeated runs to confirm freshness and new review capture
+run1,ios_app_store,7000,6899,101,0.0144285714285714,0,Country/page coverage can be inconsistent; some app-country pairs may return empty pages
+run2,google_play,6000,6000,0,0.0,0,Needs repeated runs to confirm freshness and new review capture
+run2,ios_app_store,7000,6795,205,0.0292857142857142,0,Country/page coverage can be inconsistent; some app-country pairs may return empty pages
+run3,google_play,6000,6000,0,0.0,0,Needs repeated runs to confirm freshness and new review capture
+run3,ios_app_store,6800,6750,50,0.0073529411764705,0,Country/page coverage can be inconsistent; some app-country pairs may return empty pages
