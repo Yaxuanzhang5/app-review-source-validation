@@ -1,0 +1,11 @@
+app_name_input,app_id,title,score,ratings,reviews,installs,genre,developer,updated,version,url
+YouTube,com.google.android.youtube,YouTube,3.8648734,170807378,2979570,"10,000,000,000+",Video Players & Editors,Google LLC,1782504177,Varies with device,https://play.google.com/store/apps/details?id=com.google.android.youtube&hl=en&gl=us
+TikTok,com.zhiliaoapp.musically,"TikTok - Videos, Shop & LIVE",3.9943717,69199900,2252674,"1,000,000,000+",Social,TikTok Pte. Ltd.,1782469843,Varies with device,https://play.google.com/store/apps/details?id=com.zhiliaoapp.musically&hl=en&gl=us
+Instagram,com.instagram.android,Instagram,4.0041175,168247942,4560885,"5,000,000,000+",Social,Instagram,1782191758,Varies with device,https://play.google.com/store/apps/details?id=com.instagram.android&hl=en&gl=us
+Spotify,com.spotify.music,Spotify: Music and Podcasts,4.33365,35822990,1841373,"1,000,000,000+",Music & Audio,Spotify AB,1782397000,Varies with device,https://play.google.com/store/apps/details?id=com.spotify.music&hl=en&gl=us
+Uber,com.ubercab,Uber - Request a ride,4.744739,18963267,429663,"1,000,000,000+",Maps & Navigation,"Uber Technologies, Inc.",1781945871,Varies with device,https://play.google.com/store/apps/details?id=com.ubercab&hl=en&gl=us
+DoorDash,com.dd.doordash,"DoorDash: Food, Grocery, More",4.656841,5997546,699487,"50,000,000+",Food & Drink,DoorDash,1782247583,15.280.2,https://play.google.com/store/apps/details?id=com.dd.doordash&hl=en&gl=us
+Duolingo,com.duolingo,Duolingo: Language Lessons,4.725954,46819455,947842,"500,000,000+",Education,Duolingo,1782244290,Varies with device,https://play.google.com/store/apps/details?id=com.duolingo&hl=en&gl=us
+Netflix,com.netflix.mediaclient,Netflix,3.8731575,15158236,910101,"1,000,000,000+",Entertainment,"Netflix, Inc.",1782172725,Varies with device,https://play.google.com/store/apps/details?id=com.netflix.mediaclient&hl=en&gl=us
+Airbnb,com.airbnb.android,Airbnb,4.5511627,1923314,101305,"100,000,000+",Travel & Local,Airbnb,1782255607,26.25.1,https://play.google.com/store/apps/details?id=com.airbnb.android&hl=en&gl=us
+Walmart,com.walmart.android,Walmart: Shopping & Savings,4.717994,7156910,563140,"100,000,000+",Shopping,Walmart,1782489166,26.23.1,https://play.google.com/store/apps/details?id=com.walmart.android&hl=en&gl=us

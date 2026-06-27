@@ -1,0 +1,2 @@
+total_reviews,unique_apps,unique_review_ids,earliest_review_time,latest_review_time,avg_rating,median_rating,avg_char_len,median_char_len,avg_word_count,median_word_count
+12000,10,12000,2026-05-28 17:50:21,2026-06-25 20:57:50,3.7444166666666665,5.0,74.87183333333333,28.0,14.25575,5.0

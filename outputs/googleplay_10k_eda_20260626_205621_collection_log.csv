@@ -1,0 +1,11 @@
+app_name,app_id,rows_collected,target_count,collection_status
+YouTube,com.google.android.youtube,1200,1200,complete
+TikTok,com.zhiliaoapp.musically,1200,1200,complete
+Instagram,com.instagram.android,1200,1200,complete
+Spotify,com.spotify.music,1200,1200,complete
+Uber,com.ubercab,1200,1200,complete
+DoorDash,com.dd.doordash,1200,1200,complete
+Duolingo,com.duolingo,1200,1200,complete
+Netflix,com.netflix.mediaclient,1200,1200,complete
+Airbnb,com.airbnb.android,1200,1200,complete
+Walmart,com.walmart.android,1200,1200,complete

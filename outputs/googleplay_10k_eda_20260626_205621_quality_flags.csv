@@ -1,0 +1,2 @@
+total_reviews,missing_content_rows,missing_content_pct,missing_score_rows,missing_score_pct,invalid_score_rows,invalid_score_pct,missing_review_id_rows,missing_review_id_pct,future_timestamp_rows,future_timestamp_pct,low_signal_rows,low_signal_pct,exact_duplicate_review_id_rows,exact_duplicate_review_id_pct,exact_duplicate_content_same_app_rows,exact_duplicate_content_same_app_pct,exact_duplicate_content_global_rows,exact_duplicate_content_global_pct
+12000,0,0.0,0,0.0,0,0.0,0,0.0,0,0.0,4741,39.50833333333333,0,0.0,1941,16.175,2464,20.533333333333335
