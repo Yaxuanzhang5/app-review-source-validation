@@ -1,0 +1,7 @@
+table_name,row_count
+app_sources,3
+ingestion_runs,2
+ingestion_run_targets,6
+reviews,300
+review_texts,300
+review_quality_flags,600

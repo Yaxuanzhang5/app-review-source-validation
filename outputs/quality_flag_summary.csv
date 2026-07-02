@@ -1,0 +1,3 @@
+run_id,run_type,total_flag_rows,missing_review_id_count,missing_text_count,short_text_count,missing_rating_count,missing_review_date_count,repeated_content_in_batch_count,avg_content_length
+run5_20260702_050046,controlled_batch_initial,300,0,0,27,0,0,16,81.47666666666667
+run5_20260702_050059,controlled_batch_duplicate_check,300,0,0,27,0,0,16,81.47666666666667
