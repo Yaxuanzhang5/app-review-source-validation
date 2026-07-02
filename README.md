@@ -2,52 +2,81 @@
 
 This project validates public app review sources for a potential recurring review ingestion pipeline.
 
-The main goal is to evaluate whether Google Play and iOS App Store public review sources can support repeated collection, duplicate handling, metadata checks, freshness tracking, and exploratory/data quality analysis.
+The main goal is to evaluate whether Google Play and iOS App Store public review sources can support repeated collection, duplicate handling, metadata checks, freshness tracking, database storage, and downstream data quality analysis.
 
 Google Play is tested as the primary source. The iOS App Store public RSS feed is tested as a secondary source.
 
 ---
 
-## Latest Update: SQL Database Schema Design
+## Latest Update: Run 5 Google Play Ingestion and Database Pipeline
 
-Based on the Run 4 Google Play EDA, the project has moved from data quality validation into the SQL/database schema design stage.
+The project has now moved from source validation and schema design into an actual database-backed ingestion workflow.
 
-The new schema design is documented in:
+Run 5 connects the Google Play review schema to a working SQLite ingestion pipeline. The notebook collects Google Play reviews, processes the records, inserts them into a database, handles duplicate reviews, records ingestion run information, preserves quality flags, and keeps raw and cleaned review text linked.
 
-* `database_design/google_play_review_schema.md`
-* `database_design/schema.sql`
+Main Run 5 files:
 
-The proposed schema covers:
+```text
+notebooks/Google_Play_Ingestion_Database_Pipeline.ipynb
+database/google_play_reviews.sqlite
+outputs/run5_ingestion_database_pipeline/
+```
 
-* app/source metadata,
-* ingestion runs,
-* review-level records,
-* raw vs. cleaned review text,
-* quality flags,
-* timestamps,
-* app version fields,
-* duplicate review handling,
-* repeated generic content indicators,
-* and future analysis support.
+Run 5 used a small controlled batch:
 
-The design keeps Google Play as the primary source for the first recurring ingestion pilot. Low-signal reviews and repeated generic content are preserved with quality flags instead of being removed, so downstream filtering can remain flexible and traceable.
+```text
+Apps: YouTube, TikTok, Spotify
+Country: US
+Language: English
+Sort order: Newest
+Requested count: 100 reviews per app
+```
+
+The first controlled run collected 300 reviews and inserted all 300 as new database rows.
+
+The second controlled run used the same targets and collection settings to test duplicate handling. It collected 300 reviews again, inserted 0 new rows, and correctly identified all 300 as existing duplicate records.
+
+Database validation checks also passed:
+
+```text
+total_app_sources: 3
+total_ingestion_runs: 2
+total_reviews: 300
+total_review_texts: 300
+total_quality_flags: 600
+duplicate_review_rows_same_app_source: 0
+reviews_without_text_link: 0
+quality_flags_without_review: 0
+```
+
+This confirms that the basic end-to-end ingestion and database workflow is working.
+
+The immediate repeated run confirms duplicate handling. The next step is to run the same pipeline at later collection times to test run-to-run stability and whether newly posted reviews can be captured over time.
 
 ---
 
 ## Current Project Status
 
-The project has completed the initial source validation and Google Play data quality EDA stage.
+The project has completed:
 
-The current conclusion is:
+- initial public source feasibility testing
+- repeated Google Play collection checks
+- cross-run comparison and freshness tracking
+- Google Play 10K+ review EDA
+- SQL/database schema design
+- first working Google Play ingestion and SQLite database implementation
 
-* Google Play is suitable as the primary source for the first recurring ingestion pilot.
-* Google Play public review collection supports repeated ingestion testing without requiring app owner access.
-* Review-level metadata is strong enough for source validation, recurring collection checks, and downstream exploratory analysis.
-* Duplicate and repeated-content issues should be tracked explicitly rather than removed without documentation.
-* Low-signal reviews are a real data quality issue, but they do not invalidate the source if preserved with proper flags.
-* iOS App Store public RSS review data remains useful as a secondary or comparison source, but it has stronger public feed limitations than Google Play.
+Current conclusion:
 
-The project is now moving into database schema design for the Google Play review pipeline.
+- Google Play is suitable as the primary source for the first recurring ingestion pilot.
+- Google Play public review collection supports repeated ingestion testing without requiring app owner access.
+- Review-level IDs support deduplication across repeated runs.
+- Review-level metadata is strong enough for source validation, database ingestion, recurring collection checks, and downstream exploratory analysis.
+- Low-signal reviews and repeated generic content should be preserved with quality flags rather than removed without documentation.
+- The first SQLite implementation successfully inserts new reviews, handles duplicates, stores ingestion run information, preserves quality flags, and keeps raw and cleaned text linked.
+- iOS App Store public RSS review data remains useful as a secondary or comparison source, but it has stronger public feed limitations than Google Play.
+
+The project is now moving from a basic working pipeline into repeated collection testing over time.
 
 ---
 
@@ -58,31 +87,36 @@ app-review-source-validation/
 ├── README.md
 ├── requirements.txt
 ├── data/
+├── database/
+│   └── google_play_reviews.sqlite
+├── database_design/
+│   ├── google_play_review_schema.md
+│   └── schema.sql
 ├── notebooks/
+│   └── Google_Play_Ingestion_Database_Pipeline.ipynb
 ├── outputs/
-├── reports/
-└── database_design/
-    ├── google_play_review_schema.md
-    └── schema.sql
+│   └── run5_ingestion_database_pipeline/
+└── reports/
 ```
 
 ### Folder Descriptions
 
-| Folder / File      | Purpose                                                        |
-| ------------------ | -------------------------------------------------------------- |
-| `README.md`        | Main project overview and current status                       |
-| `requirements.txt` | Python package requirements used for the validation work       |
-| `data/`            | Input or sample data files used during validation              |
-| `notebooks/`       | Colab/Jupyter notebooks for source testing and EDA             |
-| `outputs/`         | Exported CSVs, summaries, and validation outputs               |
-| `reports/`         | Written summaries or analysis notes from validation runs       |
-| `database_design/` | SQL/database schema design for the Google Play review pipeline |
+| Folder / File | Purpose |
+| --- | --- |
+| `README.md` | Main project overview and current status |
+| `requirements.txt` | Python package requirements used for validation and ingestion work |
+| `data/` | Input or sample data files used during earlier validation work |
+| `database/` | SQLite database generated by the Run 5 ingestion pipeline |
+| `database_design/` | SQL/database schema design documents |
+| `notebooks/` | Colab/Jupyter notebooks for validation, EDA, and ingestion implementation |
+| `outputs/` | Exported CSVs, summaries, schema copies, and validation outputs |
+| `reports/` | Written summaries and analysis notes from validation runs |
 
 ---
 
 ## Source Validation Scope
 
-This project focuses on two public app review sources:
+This project focuses on two public app review sources.
 
 ### 1. Google Play Reviews
 
@@ -90,16 +124,17 @@ Google Play is the primary tested source.
 
 The validation work checks:
 
-* whether reviews can be collected through public/community tools,
-* review volume availability,
-* review-level metadata fields,
-* timestamp availability,
-* app version field coverage,
-* duplicate review handling,
-* repeated ingestion feasibility,
-* low-signal review content,
-* repeated generic content,
-* and data quality issues relevant to downstream analysis.
+- whether reviews can be collected through public/community tools
+- review volume availability
+- review-level metadata fields
+- timestamp availability
+- app version field coverage
+- duplicate review handling
+- repeated ingestion feasibility
+- low-signal review content
+- repeated generic content
+- database insertion
+- data quality issues relevant to downstream analysis
 
 ### 2. iOS App Store Reviews
 
@@ -107,13 +142,13 @@ The iOS App Store public RSS feed is tested as a secondary source.
 
 The validation work checks:
 
-* public RSS feed accessibility,
-* review count limitations,
-* page/country coverage,
-* metadata fields,
-* duplicate behavior across country/page combinations,
-* empty response frequency,
-* and whether it can support repeated collection at a smaller scale.
+- public RSS feed accessibility
+- review count limitations
+- page/country coverage
+- metadata fields
+- duplicate behavior across country/page combinations
+- empty response frequency
+- whether it can support repeated collection at a smaller scale
 
 ---
 
@@ -125,17 +160,17 @@ The first validation run focused on whether public review sources could be acces
 
 Key questions:
 
-* Can public review data be collected without owner/admin access?
-* What fields are available?
-* Are timestamps available?
-* Are review IDs available for deduplication?
-* Is the source realistic for recurring ingestion?
+- Can public review data be collected without owner/admin access?
+- What fields are available?
+- Are timestamps available?
+- Are review IDs available for deduplication?
+- Is the source realistic for recurring ingestion?
 
 Main outcome:
 
-* Google Play appeared feasible for recurring public review ingestion.
-* iOS App Store public RSS was usable but more limited.
-* Google Play was selected for deeper validation.
+- Google Play appeared feasible for recurring public review ingestion.
+- iOS App Store public RSS was usable but more limited.
+- Google Play was selected for deeper validation.
 
 ---
 
@@ -145,18 +180,18 @@ The second validation run focused on repeated collection behavior.
 
 Key questions:
 
-* Can the same apps be collected repeatedly?
-* Are review IDs stable across runs?
-* Can new vs. already-known reviews be identified?
-* Are duplicate records manageable?
-* Does the source remain stable enough for a recurring pipeline?
+- Can the same apps be collected repeatedly?
+- Are review IDs stable across runs?
+- Can new versus already-known reviews be identified?
+- Are duplicate records manageable?
+- Does the source remain stable enough for a recurring pipeline?
 
 Main outcome:
 
-* Google Play review IDs were suitable for deduplication.
-* Repeated collection was feasible.
-* The pipeline should preserve run-level metadata to track newly inserted versus already-known records.
-* This finding directly supports the later database schema design.
+- Google Play review IDs were suitable for deduplication.
+- Repeated collection was feasible.
+- The pipeline should preserve run-level metadata to track newly inserted versus already-known records.
+- This finding directly supported the later database schema design.
 
 ---
 
@@ -166,17 +201,17 @@ The third validation run focused on comparing results across multiple runs.
 
 Key questions:
 
-* How many reviews are newly collected versus repeated across runs?
-* Does the source provide enough timestamp information for freshness tracking?
-* Are metadata fields stable across repeated runs?
-* What source limitations should be documented?
+- How many reviews are newly collected versus repeated across runs?
+- Does the source provide enough timestamp information for freshness tracking?
+- Are metadata fields stable across repeated runs?
+- What source limitations should be documented?
 
 Main outcome:
 
-* Google Play continued to support repeated collection and cross-run comparison.
-* Review-level timestamps supported freshness analysis.
-* Some metadata fields, especially app version-related fields, were incomplete and should be treated as nullable fields.
-* The recurring pipeline should store both first-seen and last-seen timestamps.
+- Google Play continued to support repeated collection and cross-run comparison.
+- Review-level timestamps supported freshness analysis.
+- Some metadata fields, especially app version-related fields, were incomplete and should be treated as nullable fields.
+- The recurring pipeline should store both first-seen and last-seen information.
 
 ---
 
@@ -186,19 +221,116 @@ The fourth validation run expanded the Google Play test into a deeper EDA with a
 
 Key questions:
 
-* What does the Google Play review data look like at larger scale?
-* What data quality issues appear in a 10K+ review sample?
-* How common are low-signal reviews?
-* How should repeated generic content be handled?
-* Are app version fields complete enough for downstream analysis?
-* Does the data quality support moving forward with Google Play as the primary source?
+- What does the Google Play review data look like at larger scale?
+- What data quality issues appear in a 10K+ review sample?
+- How common are low-signal reviews?
+- How should repeated generic content be handled?
+- Are app version fields complete enough for downstream analysis?
+- Does the data quality support moving forward with Google Play as the primary source?
 
 Main outcome:
 
-* The larger Google Play EDA supported using Google Play as the primary source for the first recurring ingestion pilot.
-* Low-signal reviews and repeated generic content are important quality issues, but they should be flagged rather than removed.
-* App version fields are useful when available but should remain nullable.
-* The next step is SQL/database schema design for a traceable recurring ingestion pipeline.
+- The larger Google Play EDA supported using Google Play as the primary source for the first recurring ingestion pilot.
+- Low-signal reviews and repeated generic content are important quality issues, but they should be flagged rather than removed.
+- App version fields are useful when available but should remain nullable.
+- The project moved into SQL/database schema design for a traceable recurring ingestion pipeline.
+
+---
+
+### Run 5: Google Play Ingestion and Database Pipeline
+
+The fifth run connects the schema design to an actual ingestion workflow.
+
+Key questions:
+
+- Can the pipeline collect Google Play reviews and insert them into a database?
+- Can new reviews be inserted correctly?
+- Can duplicate reviews be identified during repeated runs?
+- Can ingestion run information be recorded?
+- Can quality flags be preserved?
+- Can raw and cleaned review text stay linked?
+- Can the database structure support future repeated ingestion?
+
+Main outcome:
+
+- The first controlled run collected 300 reviews across three apps and inserted all 300 as new database rows.
+- The second controlled run collected 300 reviews again and correctly identified all 300 as already existing records.
+- No duplicate review rows were created.
+- All reviews had linked raw and cleaned text records.
+- All quality flag rows were linked back to review records.
+- The basic end-to-end ingestion and database workflow is working.
+
+---
+
+## Run 5 Output Files
+
+Run 5 output files are stored in:
+
+```text
+outputs/run5_ingestion_database_pipeline/
+```
+
+Main files:
+
+| File | Purpose |
+| --- | --- |
+| `schema_used_for_run5.sql` | SQL schema copy used by the notebook |
+| `ingestion_run_summary.csv` | Run-level metadata for each ingestion run |
+| `ingestion_target_summary.csv` | App-level ingestion result for each run |
+| `database_validation_summary.csv` | Database validation checks |
+| `quality_flag_summary.csv` | Summary of quality flags created during ingestion |
+| `sample_inserted_reviews.csv` | Sample review records with raw and cleaned text |
+| `duplicate_handling_check.csv` | Duplicate handling results across the two controlled runs |
+| `table_counts.csv` | Final row counts for each database table |
+| `review_level_database_export.csv` | Review-level export from the SQLite database |
+
+The SQLite database is stored in:
+
+```text
+database/google_play_reviews.sqlite
+```
+
+---
+
+## Run 5 Controlled Test Result
+
+Run 5 used three high-volume apps:
+
+| App | Google Play App ID |
+| --- | --- |
+| YouTube | `com.google.android.youtube` |
+| TikTok | `com.zhiliaoapp.musically` |
+| Spotify | `com.spotify.music` |
+
+Collection settings:
+
+| Setting | Value |
+| --- | --- |
+| Country | `us` |
+| Language | `en` |
+| Sort order | `newest` |
+| Requested reviews per app | `100` |
+| Number of controlled runs | `2` |
+
+First controlled run:
+
+| Metric | Result |
+| --- | --- |
+| Apps collected | 3 |
+| Reviews fetched | 300 |
+| New rows inserted | 300 |
+| Existing duplicates found | 0 |
+
+Second controlled run:
+
+| Metric | Result |
+| --- | --- |
+| Apps collected | 3 |
+| Reviews fetched | 300 |
+| New rows inserted | 0 |
+| Existing duplicates found | 300 |
+
+This confirms that the pipeline can insert new records during the first run and avoid duplicate review rows during the repeated run.
 
 ---
 
@@ -208,10 +340,10 @@ Main outcome:
 
 Google Play review-level IDs can be used to identify duplicate or already-known reviews across repeated runs.
 
-For the database design, the main deduplication key is:
+For the database design and Run 5 implementation, the main deduplication logic is based on:
 
 ```text
-(app_source_id, source_review_id)
+app source + source review id
 ```
 
 This prevents the same review from being inserted repeatedly while still allowing the pipeline to track when that review was observed again.
@@ -220,14 +352,14 @@ This prevents the same review from being inserted repeatedly while still allowin
 
 ### 2. Low-Signal Reviews Should Be Preserved with Flags
 
-Some reviews contain very limited analytical signal, such as extremely short or generic text.
+Some reviews contain limited analytical signal, such as extremely short or generic text.
 
 Examples of low-signal patterns may include:
 
-* very short reviews,
-* empty or near-empty text after cleaning,
-* generic positive comments,
-* generic repeated phrases.
+- very short reviews
+- empty or near-empty text after cleaning
+- generic positive comments
+- generic repeated phrases
 
 These reviews should not be deleted automatically. Instead, the pipeline should preserve them with quality flags so downstream users can decide whether to include or exclude them.
 
@@ -239,32 +371,20 @@ Multiple users may leave the same short review text, such as “Good app” or �
 
 These should not be treated as duplicate review records unless they share the same source review ID.
 
-The schema therefore separates:
+The pipeline therefore separates:
 
-* source-level duplicate review IDs,
-* and repeated generic review content.
+- duplicate review IDs
+- repeated review content
 
-Repeated content should be tracked using normalized text and content hash fields.
+Repeated content is tracked using cleaned text and text hash fields.
 
 ---
 
 ### 4. App Version Fields Are Useful but Incomplete
 
-Google Play review data may include app version-related fields, but coverage may be incomplete.
+Google Play review data may include app version-related fields, but coverage can be incomplete.
 
-The schema stores these fields as nullable:
-
-```text
-review_created_version
-app_version
-```
-
-Missing version values are tracked using quality flags:
-
-```text
-is_missing_review_created_version
-is_missing_app_version
-```
+The database keeps app version fields nullable instead of dropping reviews with missing version values.
 
 This keeps valid reviews in the dataset while still preserving metadata completeness information.
 
@@ -274,155 +394,139 @@ This keeps valid reviews in the dataset while still preserving metadata complete
 
 A recurring pipeline needs to know:
 
-* when each ingestion run started and ended,
-* which apps were collected,
-* how many rows were fetched,
-* how many reviews were newly inserted,
-* how many were already known,
-* whether any app-level collection failed,
-* and what raw payload was observed during each run.
+- when each ingestion run started and ended
+- which apps were collected
+- how many rows were requested
+- how many rows were fetched
+- how many reviews were newly inserted
+- how many reviews were already known
+- whether any app-level collection failed
+- which run first or last observed each review
 
-This is why the schema separates:
+This is why the database separates:
 
-* `ingestion_runs`,
-* `ingestion_run_targets`,
-* `reviews`,
-* and `review_observations`.
+- `app_sources`
+- `ingestion_runs`
+- `ingestion_run_targets`
+- `reviews`
+- `review_texts`
+- `review_quality_flags`
 
 ---
 
 ## SQL Database Schema Design
 
-The proposed Google Play review pipeline schema uses six core tables:
-
-| Table                   | Purpose                                              |
-| ----------------------- | ---------------------------------------------------- |
-| `app_sources`           | Stores app/source metadata                           |
-| `ingestion_runs`        | Stores one row per ingestion job                     |
-| `ingestion_run_targets` | Stores one row per app/source collected within a run |
-| `reviews`               | Stores canonical review-level records                |
-| `review_observations`   | Stores run-level review observation history          |
-| `review_quality_flags`  | Stores review-level data quality flags               |
-
-The full schema explanation is available here:
+The schema design is documented in:
 
 ```text
 database_design/google_play_review_schema.md
-```
-
-The SQL DDL file is available here:
-
-```text
 database_design/schema.sql
 ```
 
----
+The Run 5 SQLite implementation uses the following core tables:
 
-## Database Design Goals
+| Table | Purpose |
+| --- | --- |
+| `app_sources` | Stores app/source metadata |
+| `ingestion_runs` | Stores one row per ingestion job |
+| `ingestion_run_targets` | Stores one row per app collected within each run |
+| `reviews` | Stores canonical review-level metadata |
+| `review_texts` | Stores raw and cleaned review text |
+| `review_quality_flags` | Stores review-level data quality flags |
 
-The schema is designed to be:
+The design supports:
 
-### Clean
-
-The schema separates source metadata, ingestion runs, review records, run observations, and quality flags into different tables.
-
-This avoids a single flat table becoming difficult to maintain as the pipeline grows.
-
-### Traceable
-
-Each review can be traced back to:
-
-* the app/source,
-* the ingestion run,
-* the run target,
-* the first time it was seen,
-* the last time it was observed,
-* and the original source payload.
-
-### Extensible
-
-The schema can support future changes, including:
-
-* more apps,
-* more countries/languages,
-* new quality flags,
-* new source fields,
-* additional downstream analysis needs,
-* and potential future public review sources.
+- source metadata tracking
+- ingestion run tracking
+- app-level run summaries
+- canonical review records
+- raw and cleaned text storage
+- quality flag preservation
+- duplicate review handling
+- downstream analysis
 
 ---
 
 ## Deduplication Logic
 
-The main source-level deduplication key is:
-
-```text
-(app_source_id, source_review_id)
-```
-
-The ingestion logic should work as follows:
+The current ingestion logic works as follows:
 
 1. Fetch reviews for each app/source.
-2. Map each review to an internal `app_source_id`.
-3. Use the source review ID as `source_review_id`.
-4. Check whether `(app_source_id, source_review_id)` already exists in the `reviews` table.
-5. If it does not exist, insert the review as a new canonical review.
-6. If it already exists, do not insert a duplicate review row.
-7. Update mutable fields if needed, such as helpful count, developer reply, app version fields, and last-seen timestamp.
-8. Store one row in `review_observations` to track whether the review was inserted, already known, or updated during that run.
+2. Map each app to an internal `app_source_id`.
+3. Use the source review ID as the source-level review identifier.
+4. Create an internal review key from the app source and source review ID.
+5. Check whether the review already exists in the `reviews` table.
+6. If it does not exist, insert it as a new review.
+7. If it already exists, do not insert a duplicate review row.
+8. Update the existing row with the latest `last_seen_run_id`.
+9. Store raw and cleaned review text in `review_texts`.
+10. Store quality flags in `review_quality_flags`.
+11. Record run-level and app-level ingestion summary information.
 
-This design supports recurring ingestion without losing run-level collection history.
+This supports repeated ingestion while keeping the database traceable.
 
 ---
 
 ## Quality Flag Design
 
-The pipeline should preserve review quality issues with explicit flags.
+The Run 5 pipeline preserves review quality issues with explicit flags.
 
-Example flags include:
+Current flags include:
 
-| Flag                                | Purpose                                            |
-| ----------------------------------- | -------------------------------------------------- |
-| `is_empty_after_cleaning`           | Indicates review text becomes empty after cleaning |
-| `is_short_text`                     | Indicates very short review text                   |
-| `is_low_signal`                     | Indicates limited analytical signal                |
-| `is_repeated_generic_content`       | Indicates repeated normalized text                 |
-| `is_missing_review_created_version` | Indicates missing review-created app version       |
-| `is_missing_app_version`            | Indicates missing app version field                |
-| `has_developer_reply`               | Indicates whether the review has a developer reply |
+| Flag | Purpose |
+| --- | --- |
+| `is_missing_review_id` | Indicates missing source review ID |
+| `is_missing_text` | Indicates missing or empty review text |
+| `is_short_text` | Indicates very short review text |
+| `is_missing_rating` | Indicates missing rating value |
+| `is_missing_review_date` | Indicates missing review timestamp |
+| `is_repeated_content_in_batch` | Indicates repeated cleaned text within the same collected batch |
 
-The quality flag logic should be versioned using:
+These flags are stored instead of deleting records, so later analysis can decide how strict the filtering should be.
 
-```text
-quality_flag_version
-```
+---
 
-This allows future changes to the flagging rules without losing traceability.
+## Database Validation Checks
+
+Run 5 includes database validation checks to confirm that the schema and ingestion logic work correctly.
+
+Important validation results:
+
+| Check | Result |
+| --- | --- |
+| Total app sources | 3 |
+| Total ingestion runs | 2 |
+| Total reviews | 300 |
+| Total review text rows | 300 |
+| Total quality flag rows | 600 |
+| Duplicate review rows for same app source and source review ID | 0 |
+| Reviews without linked text records | 0 |
+| Quality flags without linked review records | 0 |
+
+These checks confirm that:
+
+- new reviews are inserted correctly
+- repeated reviews are not inserted as duplicate rows
+- raw and cleaned text records are linked to review records
+- quality flags are linked to review records
+- run-level and app-level metadata are preserved
 
 ---
 
 ## Analysis Support
 
-The schema supports downstream analysis such as:
+The database and outputs support downstream analysis such as:
 
-* rating distribution by app,
-* review volume by source review date,
-* review volume by ingestion date,
-* new versus already-known review counts,
-* low-signal review rate,
-* repeated generic content rate,
-* app version coverage,
-* review length distribution,
-* developer reply coverage,
-* and review trends over time.
-
-The SQL design also includes an analysis-ready view:
-
-```text
-vw_google_play_reviews_analysis
-```
-
-This view combines app metadata, review-level fields, and quality flags for easier downstream use.
+- rating distribution by app
+- review volume by source review date
+- review volume by ingestion run
+- new versus already-known review counts
+- duplicate handling checks
+- low-signal review rate
+- repeated content rate
+- app version coverage
+- review length distribution
+- review trends over time
 
 ---
 
@@ -430,7 +534,7 @@ This view combines app metadata, review-level fields, and quality flags for easi
 
 ### 1. Review the Source Validation Work
 
-Start with the notebooks, outputs, and reports folders to understand the source validation and EDA work:
+Start with the notebooks, outputs, and reports folders to understand the earlier source validation and EDA work:
 
 ```text
 notebooks/
@@ -440,7 +544,7 @@ reports/
 
 ### 2. Review the Database Design
 
-The current database design work is located in:
+The database design work is located in:
 
 ```text
 database_design/
@@ -453,7 +557,27 @@ database_design/google_play_review_schema.md
 database_design/schema.sql
 ```
 
-### 3. Install Python Requirements
+### 3. Review the Run 5 Ingestion Pipeline
+
+The working ingestion notebook is located in:
+
+```text
+notebooks/Google_Play_Ingestion_Database_Pipeline.ipynb
+```
+
+The generated SQLite database is located in:
+
+```text
+database/google_play_reviews.sqlite
+```
+
+The Run 5 validation outputs are located in:
+
+```text
+outputs/run5_ingestion_database_pipeline/
+```
+
+### 4. Install Python Requirements
 
 If running the notebooks locally, install the required packages:
 
@@ -461,15 +585,56 @@ If running the notebooks locally, install the required packages:
 pip install -r requirements.txt
 ```
 
-### 4. Run the Notebooks
-
-The validation notebooks are stored in:
+The main packages used include:
 
 ```text
-notebooks/
+google-play-scraper
+pandas
 ```
 
-They are intended to document the public source testing, repeated collection checks, and Google Play review EDA process.
+SQLite is used through Python’s built-in `sqlite3` module.
+
+### 5. Run the Notebook
+
+The Run 5 notebook documents the first working Google Play ingestion and database implementation.
+
+It can be rerun to:
+
+- collect reviews
+- insert new records
+- test duplicate handling
+- create quality flags
+- record ingestion run metadata
+- generate validation outputs
+
+---
+
+## Next Steps
+
+The immediate repeated run confirms duplicate handling. The next step is to run the same pipeline at later collection times.
+
+The next repeated tests should check:
+
+- whether the pipeline remains stable across several collection runs
+- whether new reviews can be captured over time
+- whether already-known reviews continue to be identified as existing records
+- whether run-level metadata remains consistent
+- whether quality flags remain stable across repeated runs
+- whether app-level collection failures or empty responses occur
+
+Expected repeated-run output pattern:
+
+```text
+If no new reviews are captured:
+inserted_new_count = 0
+duplicate_existing_count = fetched_count
+
+If new reviews are captured:
+inserted_new_count > 0
+duplicate_existing_count < fetched_count
+```
+
+This will help confirm whether the database-backed ingestion workflow can support recurring collection beyond the initial controlled test.
 
 ---
 
@@ -477,20 +642,23 @@ They are intended to document the public source testing, repeated collection che
 
 The validation work supports moving forward with Google Play as the primary source for the first recurring review ingestion pilot.
 
-The most important next step is to convert the validation findings into a traceable SQL-backed ingestion structure.
+The project has now moved beyond source validation and schema design. Run 5 shows that a basic database-backed ingestion workflow is working.
 
-The current schema design addresses this by documenting:
+The current implementation can:
 
-* app/source metadata,
-* ingestion run tracking,
-* review-level canonical records,
-* run-level review observations,
-* raw and cleaned text fields,
-* quality flags,
-* app version fields,
-* duplicate handling,
-* repeated-content indicators,
-* timestamps,
-* and analysis-ready outputs.
+- collect Google Play reviews
+- process review records
+- insert new reviews into SQLite
+- avoid duplicate review rows during repeated runs
+- record ingestion run information
+- store app-level ingestion summaries
+- preserve raw and cleaned review text
+- keep text records linked to review records
+- create quality flags
+- export validation outputs
+
+The first controlled run inserted 300 new review records. The second controlled run fetched 300 reviews again, inserted 0 new rows, and identified all 300 as existing records. The database validation checks also showed 0 duplicate review rows, 0 reviews without linked text records, and 0 quality flags without linked review records.
 
 Overall, Google Play remains the strongest source for the first recurring ingestion pilot, while iOS App Store public RSS can remain a secondary or comparison source.
+
+The next step is to run the same pipeline at a few later collection times to evaluate run-to-run stability and whether new reviews can be captured reliably over time.
