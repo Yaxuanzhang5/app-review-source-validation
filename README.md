@@ -18,11 +18,12 @@ Main Run 5 files:
 
 ```text
 notebooks/Google_Play_Ingestion_Database_Pipeline.ipynb
+notebooks/Google_Play_Ingestion_Database_Pipeline_Day2.ipynb
 database/google_play_reviews.sqlite
 outputs/run5_ingestion_database_pipeline/
 ```
 
-Run 5 used a small controlled batch:
+The first controlled implementation used a small batch:
 
 ```text
 Apps: YouTube, TikTok, Spotify
@@ -34,9 +35,9 @@ Requested count: 100 reviews per app
 
 The first controlled run collected 300 reviews and inserted all 300 as new database rows.
 
-The second controlled run used the same targets and collection settings to test duplicate handling. It collected 300 reviews again, inserted 0 new rows, and correctly identified all 300 as existing duplicate records.
+The immediate second controlled run used the same targets and collection settings to test duplicate handling. It collected 300 reviews again, inserted 0 new rows, and correctly identified all 300 records as existing duplicate records.
 
-Database validation checks also passed:
+Database validation checks passed:
 
 ```text
 total_app_sources: 3
@@ -49,9 +50,52 @@ reviews_without_text_link: 0
 quality_flags_without_review: 0
 ```
 
-This confirms that the basic end-to-end ingestion and database workflow is working.
+This confirmed that the basic end-to-end ingestion and database workflow was working.
 
-The immediate repeated run confirms duplicate handling. The next step is to run the same pipeline at later collection times to test run-to-run stability and whether newly posted reviews can be captured over time.
+---
+
+## Day 2 Repeated Collection Update
+
+A Day 2 repeated collection test was completed using the existing SQLite database from the previous controlled test.
+
+This Day 2 run was not started from an empty database. Before the Day 2 run, the uploaded database already contained:
+
+```text
+app_sources: 3
+ingestion_runs: 2
+ingestion_run_targets: 6
+reviews: 300
+review_texts: 300
+review_quality_flags: 600
+```
+
+The Day 2 run used the same app targets and collection settings:
+
+```text
+Apps: YouTube, TikTok, Spotify
+Country: US
+Language: English
+Sort order: Newest
+Requested count: 100 reviews per app
+```
+
+The Day 2 run fetched 300 reviews across the three apps. Compared with the existing database, all 300 collected records were previously unseen source review IDs. The pipeline inserted 300 new review rows and identified 0 existing duplicates in this run.
+
+After the Day 2 run, the database contained:
+
+```text
+app_sources: 3
+ingestion_runs: 3
+ingestion_run_targets: 9
+reviews: 600
+review_texts: 600
+review_quality_flags: 900
+duplicate_review_rows_same_app_source: 0
+reviews_without_text_link: 0
+quality_flags_without_review: 0
+```
+
+This confirms that the pipeline remained stable during the Day 2 repeated collection test. It also shows that the database-backed workflow can capture previously unseen review records over time while preserving ingestion run information, quality flags, and raw/cleaned text linkage.
 
 ---
 
@@ -65,6 +109,7 @@ The project has completed:
 - Google Play 10K+ review EDA
 - SQL/database schema design
 - first working Google Play ingestion and SQLite database implementation
+- Day 2 repeated collection test using the existing database
 
 Current conclusion:
 
@@ -73,10 +118,11 @@ Current conclusion:
 - Review-level IDs support deduplication across repeated runs.
 - Review-level metadata is strong enough for source validation, database ingestion, recurring collection checks, and downstream exploratory analysis.
 - Low-signal reviews and repeated generic content should be preserved with quality flags rather than removed without documentation.
-- The first SQLite implementation successfully inserts new reviews, handles duplicates, stores ingestion run information, preserves quality flags, and keeps raw and cleaned text linked.
+- The SQLite implementation successfully inserts new reviews, handles duplicates, stores ingestion run information, preserves quality flags, and keeps raw and cleaned text linked.
+- The Day 2 repeated collection test shows that the pipeline can continue from an existing database and capture previously unseen review records over time.
 - iOS App Store public RSS review data remains useful as a secondary or comparison source, but it has stronger public feed limitations than Google Play.
 
-The project is now moving from a basic working pipeline into repeated collection testing over time.
+The project is now moving from a basic working pipeline into additional repeated collection testing over time.
 
 ---
 
@@ -93,7 +139,8 @@ app-review-source-validation/
 │   ├── google_play_review_schema.md
 │   └── schema.sql
 ├── notebooks/
-│   └── Google_Play_Ingestion_Database_Pipeline.ipynb
+│   ├── Google_Play_Ingestion_Database_Pipeline.ipynb
+│   └── Google_Play_Ingestion_Database_Pipeline_Day2.ipynb
 ├── outputs/
 │   └── run5_ingestion_database_pipeline/
 └── reports/
@@ -106,7 +153,7 @@ app-review-source-validation/
 | `README.md` | Main project overview and current status |
 | `requirements.txt` | Python package requirements used for validation and ingestion work |
 | `data/` | Input or sample data files used during earlier validation work |
-| `database/` | SQLite database generated by the Run 5 ingestion pipeline |
+| `database/` | SQLite database generated and updated by the ingestion pipeline |
 | `database_design/` | SQL/database schema design documents |
 | `notebooks/` | Colab/Jupyter notebooks for validation, EDA, and ingestion implementation |
 | `outputs/` | Exported CSVs, summaries, schema copies, and validation outputs |
@@ -250,15 +297,18 @@ Key questions:
 - Can quality flags be preserved?
 - Can raw and cleaned review text stay linked?
 - Can the database structure support future repeated ingestion?
+- Can the same pipeline continue from an existing database on a later collection day?
 
 Main outcome:
 
 - The first controlled run collected 300 reviews across three apps and inserted all 300 as new database rows.
-- The second controlled run collected 300 reviews again and correctly identified all 300 as already existing records.
+- The immediate duplicate handling run collected 300 reviews again and correctly identified all 300 as already existing records.
+- The Day 2 repeated collection run continued from the existing database and inserted 300 previously unseen review records.
 - No duplicate review rows were created.
 - All reviews had linked raw and cleaned text records.
 - All quality flag rows were linked back to review records.
 - The basic end-to-end ingestion and database workflow is working.
+- The Day 2 run provides initial evidence that the pipeline can capture new records over time.
 
 ---
 
@@ -275,14 +325,21 @@ Main files:
 | File | Purpose |
 | --- | --- |
 | `schema_used_for_run5.sql` | SQL schema copy used by the notebook |
-| `ingestion_run_summary.csv` | Run-level metadata for each ingestion run |
+| `ingestion_run_summary.csv` | Run-level metadata for ingestion runs |
 | `ingestion_target_summary.csv` | App-level ingestion result for each run |
 | `database_validation_summary.csv` | Database validation checks |
 | `quality_flag_summary.csv` | Summary of quality flags created during ingestion |
 | `sample_inserted_reviews.csv` | Sample review records with raw and cleaned text |
-| `duplicate_handling_check.csv` | Duplicate handling results across the two controlled runs |
+| `duplicate_handling_check.csv` | Duplicate handling results from the controlled runs |
 | `table_counts.csv` | Final row counts for each database table |
 | `review_level_database_export.csv` | Review-level export from the SQLite database |
+| `day2_run_comparison.csv` | App-level comparison across all runs including Day 2 |
+| `aggregated_run_summary.csv` | Run-level aggregated summary across all runs |
+| `day2_database_validation_summary.csv` | Day 2 database validation results |
+| `day2_quality_flag_summary.csv` | Day 2 quality flag summary |
+| `day2_sample_inserted_reviews.csv` | Sample review rows after Day 2 |
+| `day2_table_counts.csv` | Table row counts after Day 2 |
+| `day2_review_level_database_export.csv` | Review-level database export after Day 2 |
 
 The SQLite database is stored in:
 
@@ -310,9 +367,8 @@ Collection settings:
 | Language | `en` |
 | Sort order | `newest` |
 | Requested reviews per app | `100` |
-| Number of controlled runs | `2` |
 
-First controlled run:
+Initial controlled run:
 
 | Metric | Result |
 | --- | --- |
@@ -320,8 +376,9 @@ First controlled run:
 | Reviews fetched | 300 |
 | New rows inserted | 300 |
 | Existing duplicates found | 0 |
+| Failed app collections | 0 |
 
-Second controlled run:
+Immediate duplicate handling run:
 
 | Metric | Result |
 | --- | --- |
@@ -329,8 +386,46 @@ Second controlled run:
 | Reviews fetched | 300 |
 | New rows inserted | 0 |
 | Existing duplicates found | 300 |
+| Failed app collections | 0 |
 
-This confirms that the pipeline can insert new records during the first run and avoid duplicate review rows during the repeated run.
+Day 2 repeated collection run:
+
+| Metric | Result |
+| --- | --- |
+| Apps collected | 3 |
+| Reviews fetched | 300 |
+| New rows inserted | 300 |
+| Existing duplicates found | 0 |
+| Failed app collections | 0 |
+
+This confirms that the pipeline can insert new records, avoid duplicate rows during an immediate repeated run, and continue from the existing database during a later repeated collection test.
+
+---
+
+## Day 2 Database Validation Results
+
+After the Day 2 run, the database validation checks showed:
+
+| Check | Result |
+| --- | --- |
+| Total app sources | 3 |
+| Total ingestion runs | 3 |
+| Total ingestion run targets | 9 |
+| Total reviews | 600 |
+| Total review text rows | 600 |
+| Total quality flag rows | 900 |
+| Duplicate review rows for same app source and source review ID | 0 |
+| Reviews without linked text records | 0 |
+| Quality flags without linked review records | 0 |
+
+These checks confirm that:
+
+- new reviews were inserted correctly
+- repeated reviews were not inserted as duplicate rows
+- raw and cleaned text records remained linked to review records
+- quality flags remained linked to review records
+- run-level and app-level metadata were preserved
+- the Day 2 repeated collection run did not break the database structure
 
 ---
 
@@ -490,15 +585,16 @@ These flags are stored instead of deleting records, so later analysis can decide
 
 Run 5 includes database validation checks to confirm that the schema and ingestion logic work correctly.
 
-Important validation results:
+Important validation results after Day 2:
 
 | Check | Result |
 | --- | --- |
 | Total app sources | 3 |
-| Total ingestion runs | 2 |
-| Total reviews | 300 |
-| Total review text rows | 300 |
-| Total quality flag rows | 600 |
+| Total ingestion runs | 3 |
+| Total ingestion run targets | 9 |
+| Total reviews | 600 |
+| Total review text rows | 600 |
+| Total quality flag rows | 900 |
 | Duplicate review rows for same app source and source review ID | 0 |
 | Reviews without linked text records | 0 |
 | Quality flags without linked review records | 0 |
@@ -559,10 +655,16 @@ database_design/schema.sql
 
 ### 3. Review the Run 5 Ingestion Pipeline
 
-The working ingestion notebook is located in:
+The initial working ingestion notebook is located in:
 
 ```text
 notebooks/Google_Play_Ingestion_Database_Pipeline.ipynb
+```
+
+The Day 2 repeated collection notebook is located in:
+
+```text
+notebooks/Google_Play_Ingestion_Database_Pipeline_Day2.ipynb
 ```
 
 The generated SQLite database is located in:
@@ -596,9 +698,9 @@ SQLite is used through Python’s built-in `sqlite3` module.
 
 ### 5. Run the Notebook
 
-The Run 5 notebook documents the first working Google Play ingestion and database implementation.
+The Run 5 notebooks document the first working Google Play ingestion and database implementation.
 
-It can be rerun to:
+They can be used to:
 
 - collect reviews
 - insert new records
@@ -606,17 +708,22 @@ It can be rerun to:
 - create quality flags
 - record ingestion run metadata
 - generate validation outputs
+- continue repeated collection from an existing SQLite database
+
+For repeated collection testing, the existing `google_play_reviews.sqlite` database should be reused instead of starting from an empty database.
 
 ---
 
 ## Next Steps
 
-The immediate repeated run confirms duplicate handling. The next step is to run the same pipeline at later collection times.
+The immediate duplicate handling run confirms that the pipeline can avoid duplicate review rows when the same records are collected again.
+
+The Day 2 repeated collection run confirms that the pipeline can continue from an existing database and capture previously unseen review records after time has passed.
 
 The next repeated tests should check:
 
 - whether the pipeline remains stable across several collection runs
-- whether new reviews can be captured over time
+- whether new reviews can continue to be captured over time
 - whether already-known reviews continue to be identified as existing records
 - whether run-level metadata remains consistent
 - whether quality flags remain stable across repeated runs
@@ -625,16 +732,16 @@ The next repeated tests should check:
 Expected repeated-run output pattern:
 
 ```text
-If no new reviews are captured:
+If no new review IDs are captured:
 inserted_new_count = 0
 duplicate_existing_count = fetched_count
 
-If new reviews are captured:
+If previously unseen review IDs are captured:
 inserted_new_count > 0
 duplicate_existing_count < fetched_count
 ```
 
-This will help confirm whether the database-backed ingestion workflow can support recurring collection beyond the initial controlled test.
+This will help confirm whether the database-backed ingestion workflow can support recurring collection beyond the initial controlled tests.
 
 ---
 
@@ -656,9 +763,12 @@ The current implementation can:
 - keep text records linked to review records
 - create quality flags
 - export validation outputs
+- continue repeated collection from an existing database
 
-The first controlled run inserted 300 new review records. The second controlled run fetched 300 reviews again, inserted 0 new rows, and identified all 300 as existing records. The database validation checks also showed 0 duplicate review rows, 0 reviews without linked text records, and 0 quality flags without linked review records.
+The first controlled run inserted 300 new review records. The immediate duplicate handling run fetched 300 reviews again, inserted 0 new rows, and identified all 300 as existing records. The Day 2 repeated collection run fetched another 300 reviews and inserted 300 previously unseen review records.
+
+After the Day 2 run, the database contained 600 unique review records, 600 linked review text records, and 900 quality flag rows across 3 ingestion runs. The database validation checks still showed 0 duplicate review rows, 0 reviews without linked text records, and 0 quality flags without linked review records.
 
 Overall, Google Play remains the strongest source for the first recurring ingestion pilot, while iOS App Store public RSS can remain a secondary or comparison source.
 
-The next step is to run the same pipeline at a few later collection times to evaluate run-to-run stability and whether new reviews can be captured reliably over time.
+The next step is to continue running the same pipeline at additional collection times to further evaluate run-to-run stability and recurring new review capture.
