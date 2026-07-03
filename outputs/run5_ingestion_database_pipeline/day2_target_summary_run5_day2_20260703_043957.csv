@@ -1,0 +1,4 @@
+run_id,app_name,app_id,requested_count,fetched_count,inserted_new_count,duplicate_existing_count,failed_count,min_review_created_at,max_review_created_at,error_message
+run5_day2_20260703_043957,YouTube,com.google.android.youtube,100,100,100,0,0,2026-07-02T02:53:31+00:00,2026-07-02T04:39:56+00:00,
+run5_day2_20260703_043957,TikTok,com.zhiliaoapp.musically,100,100,100,0,0,2026-07-01T23:08:30+00:00,2026-07-02T04:38:54+00:00,
+run5_day2_20260703_043957,Spotify,com.spotify.music,100,100,100,0,0,2026-07-02T00:57:56+00:00,2026-07-02T04:37:07+00:00,

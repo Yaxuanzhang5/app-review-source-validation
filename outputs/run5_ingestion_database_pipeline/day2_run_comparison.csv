@@ -1,0 +1,10 @@
+run_id,run_type,app_name,app_id,country,language,requested_count,fetched_count,inserted_new_count,duplicate_existing_count,failed_count,min_review_created_at,max_review_created_at,error_message
+run5_20260702_050046,controlled_batch_initial,Spotify,com.spotify.music,us,en,100,100,100,0,0,2026-07-01T00:44:56+00:00,2026-07-01T05:00:36+00:00,
+run5_20260702_050046,controlled_batch_initial,TikTok,com.zhiliaoapp.musically,us,en,100,100,100,0,0,2026-07-01T00:23:21+00:00,2026-07-01T04:55:51+00:00,
+run5_20260702_050046,controlled_batch_initial,YouTube,com.google.android.youtube,us,en,100,100,100,0,0,2026-07-01T04:02:55+00:00,2026-07-01T05:00:41+00:00,
+run5_20260702_050059,controlled_batch_duplicate_check,Spotify,com.spotify.music,us,en,100,100,0,100,0,2026-07-01T00:44:56+00:00,2026-07-01T05:00:36+00:00,
+run5_20260702_050059,controlled_batch_duplicate_check,TikTok,com.zhiliaoapp.musically,us,en,100,100,0,100,0,2026-07-01T00:23:21+00:00,2026-07-01T04:55:51+00:00,
+run5_20260702_050059,controlled_batch_duplicate_check,YouTube,com.google.android.youtube,us,en,100,100,0,100,0,2026-07-01T04:02:55+00:00,2026-07-01T05:00:41+00:00,
+run5_day2_20260703_043957,day2_repeated_collection,Spotify,com.spotify.music,us,en,100,100,100,0,0,2026-07-02T00:57:56+00:00,2026-07-02T04:37:07+00:00,
+run5_day2_20260703_043957,day2_repeated_collection,TikTok,com.zhiliaoapp.musically,us,en,100,100,100,0,0,2026-07-01T23:08:30+00:00,2026-07-02T04:38:54+00:00,
+run5_day2_20260703_043957,day2_repeated_collection,YouTube,com.google.android.youtube,us,en,100,100,100,0,0,2026-07-02T02:53:31+00:00,2026-07-02T04:39:56+00:00,

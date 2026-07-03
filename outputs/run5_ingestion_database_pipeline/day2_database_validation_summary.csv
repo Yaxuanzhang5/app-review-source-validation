@@ -1,0 +1,10 @@
+check_name,result_value
+total_app_sources,3
+total_ingestion_runs,3
+total_ingestion_run_targets,9
+total_reviews,600
+total_review_texts,600
+total_quality_flags,900
+duplicate_review_rows_same_app_source,0
+reviews_without_text_link,0
+quality_flags_without_review,0
