@@ -1,0 +1,5 @@
+run_id,run_type,run_started_at,run_finished_at,run_status,total_requested_count,total_fetched_count,total_inserted_new_count,total_duplicate_existing_count,total_failed_count,earliest_review_created_at,latest_review_created_at
+run5_20260702_050046,controlled_batch_initial,2026-07-02T05:00:46.526983+00:00,2026-07-02T05:00:47.617467+00:00,completed,300,300,300,0,0,2026-07-01T00:23:21+00:00,2026-07-01T05:00:41+00:00
+run5_20260702_050059,controlled_batch_duplicate_check,2026-07-02T05:00:59.782587+00:00,2026-07-02T05:01:00.347090+00:00,completed,300,300,0,300,0,2026-07-01T00:23:21+00:00,2026-07-01T05:00:41+00:00
+run5_day2_20260703_043957,day2_repeated_collection,2026-07-03T04:39:57.579279+00:00,2026-07-03T04:39:58.386382+00:00,completed,300,300,300,0,0,2026-07-01T23:08:30+00:00,2026-07-02T04:39:56+00:00
+run5_day3_20260704_032957,day3_repeated_collection,2026-07-04T03:29:57.503814+00:00,2026-07-04T03:29:58.299209+00:00,completed,300,300,300,0,0,2026-07-02T21:06:36+00:00,2026-07-03T03:29:55+00:00

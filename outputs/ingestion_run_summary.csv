@@ -1,3 +1,5 @@
 run_id,source_platform,run_started_at,run_finished_at,run_status,run_type,scraper_package,sort_order,requested_count_per_app,notes
 run5_20260702_050046,google_play,2026-07-02T05:00:46.526983+00:00,2026-07-02T05:00:47.617467+00:00,completed,controlled_batch_initial,google-play-scraper,newest,100,First controlled ingestion run for database implementation test.
 run5_20260702_050059,google_play,2026-07-02T05:00:59.782587+00:00,2026-07-02T05:01:00.347090+00:00,completed,controlled_batch_duplicate_check,google-play-scraper,newest,100,Second run using the same targets to test duplicate handling.
+run5_day2_20260703_043957,google_play,2026-07-03T04:39:57.579279+00:00,2026-07-03T04:39:58.386382+00:00,completed,day2_repeated_collection,google-play-scraper,newest,100,Day 2 repeated collection test using the same app targets to check stability and new review capture over time.
+run5_day3_20260704_032957,google_play,2026-07-04T03:29:57.503814+00:00,2026-07-04T03:29:58.299209+00:00,completed,day3_repeated_collection,google-play-scraper,newest,100,Day 3 repeated collection test using the existing database to check continued stability and new review capture over time.
