@@ -1,0 +1,14 @@
+table_name,row_count_before,row_count_after,row_growth
+app_sources,3,3,0
+ingestion_run_targets,12,12,0
+ingestion_runs,4,4,0
+phase2_app_run_summary,0,10,10
+phase2_apps,0,10,10
+phase2_ingestion_runs,0,1,1
+phase2_quality_flags,0,0,0
+phase2_reviews_cleaned,0,0,0
+phase2_reviews_raw,0,0,0
+review_quality_flags,1200,1200,0
+review_texts,900,900,0
+reviews,900,900,0
+sqlite_sequence,3,3,0

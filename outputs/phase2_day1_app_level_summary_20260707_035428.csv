@@ -1,0 +1,11 @@
+run_id,app_name,app_id,target_reviews,records_fetched,unique_reviews_in_batch,duplicate_reviews_in_batch,new_records_inserted,duplicates_skipped,runtime_seconds,min_review_date,max_review_date,missing_review_id_count,missing_content_count,empty_content_count,missing_score_count,invalid_score_count,missing_review_date_count,missing_app_version_count,missing_developer_reply_count,quality_flag_count,quality_flags_inserted,error_message
+phase2_day1_controlled_scale_20260707_035428,YouTube,com.google.android.youtube,1200,1200,0,0,0,0,0.71,,,0,0,0,0,0,0,0,0,0,0,name 'raw_review_to_row' is not defined
+phase2_day1_controlled_scale_20260707_035428,TikTok,com.zhiliaoapp.musically,1200,1200,0,0,0,0,0.91,,,0,0,0,0,0,0,0,0,0,0,name 'raw_review_to_row' is not defined
+phase2_day1_controlled_scale_20260707_035428,Spotify,com.spotify.music,1200,1200,0,0,0,0,0.57,,,0,0,0,0,0,0,0,0,0,0,name 'raw_review_to_row' is not defined
+phase2_day1_controlled_scale_20260707_035428,Instagram,com.instagram.android,1200,1200,0,0,0,0,0.7,,,0,0,0,0,0,0,0,0,0,0,name 'raw_review_to_row' is not defined
+phase2_day1_controlled_scale_20260707_035428,Uber,com.ubercab,1200,1200,0,0,0,0,0.57,,,0,0,0,0,0,0,0,0,0,0,name 'raw_review_to_row' is not defined
+phase2_day1_controlled_scale_20260707_035428,DoorDash,com.dd.doordash,1200,1200,0,0,0,0,0.7,,,0,0,0,0,0,0,0,0,0,0,name 'raw_review_to_row' is not defined
+phase2_day1_controlled_scale_20260707_035428,Duolingo,com.duolingo,1200,1200,0,0,0,0,0.57,,,0,0,0,0,0,0,0,0,0,0,name 'raw_review_to_row' is not defined
+phase2_day1_controlled_scale_20260707_035428,Google Maps,com.google.android.apps.maps,1200,1200,0,0,0,0,0.66,,,0,0,0,0,0,0,0,0,0,0,name 'raw_review_to_row' is not defined
+phase2_day1_controlled_scale_20260707_035428,Netflix,com.netflix.mediaclient,1200,1200,0,0,0,0,0.53,,,0,0,0,0,0,0,0,0,0,0,name 'raw_review_to_row' is not defined
+phase2_day1_controlled_scale_20260707_035428,Reddit,com.reddit.frontpage,1200,1200,0,0,0,0,1.13,,,0,0,0,0,0,0,0,0,0,0,name 'raw_review_to_row' is not defined
