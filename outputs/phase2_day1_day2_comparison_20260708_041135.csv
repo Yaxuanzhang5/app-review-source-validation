@@ -1,0 +1,3 @@
+run_label,frequency_label,status,records_fetched_total,new_records_inserted_total,duplicates_skipped_total,errors_total,quality_flag_total,db_size_before_mb,db_size_after_mb,db_size_growth_mb,review_rows_before,review_rows_after,review_rows_growth,runtime_seconds
+phase2_day1_controlled_scale,once_daily_baseline,completed,12000,12000,0,0,12633,1.83203125,25.4921875,23.66015625,0,12000,12000,23.271117
+phase2_day2_daily_followup,daily_followup,completed,12000,156,11844,0,12638,25.4921875,30.1875,4.6953125,12000,12156,156,75.799585

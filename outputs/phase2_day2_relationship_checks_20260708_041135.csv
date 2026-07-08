@@ -1,0 +1,7 @@
+check_name,issue_count,status
+raw_reviews_have_app_record,0,pass
+cleaned_reviews_link_to_raw_reviews,0,pass
+quality_flags_link_to_raw_reviews,0,pass
+quality_flags_link_to_ingestion_run,0,pass
+no_duplicate_source_app_review_id,0,pass
+run_reviews_link_to_ingestion_run,0,pass

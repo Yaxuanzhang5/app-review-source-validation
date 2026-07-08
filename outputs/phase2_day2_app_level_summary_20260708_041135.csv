@@ -1,0 +1,11 @@
+run_id,app_name,app_id,target_reviews,records_fetched,unique_reviews_in_batch,duplicate_reviews_in_batch,new_records_inserted,duplicates_skipped,runtime_seconds,min_review_date,max_review_date,missing_review_id_count,missing_content_count,empty_content_count,missing_score_count,invalid_score_count,missing_review_date_count,missing_app_version_count,missing_developer_reply_count,quality_flag_count,quality_flags_inserted,error_message
+phase2_day2_daily_followup_20260708_041135,YouTube,com.google.android.youtube,1200,1200,1200,0,33,1167,1.02,2026-07-06T09:48:19+00:00,2026-07-07T04:14:03+00:00,0,0,0,0,0,0,21,1200,1221,1221,
+phase2_day2_daily_followup_20260708_041135,TikTok,com.zhiliaoapp.musically,1200,1200,1200,0,7,1193,0.78,2026-07-05T03:35:23+00:00,2026-07-07T04:14:30+00:00,0,0,0,0,0,0,448,182,630,630,
+phase2_day2_daily_followup_20260708_041135,Spotify,com.spotify.music,1200,1200,1200,0,15,1185,0.71,2026-07-05T13:12:10+00:00,2026-07-07T04:15:01+00:00,0,0,0,0,0,0,190,1057,1247,1247,
+phase2_day2_daily_followup_20260708_041135,Instagram,com.instagram.android,1200,1200,1200,0,52,1148,0.98,2026-07-06T14:04:28+00:00,2026-07-07T04:16:51+00:00,0,0,0,0,0,0,384,1200,1584,1584,
+phase2_day2_daily_followup_20260708_041135,Uber,com.ubercab,1200,1200,1200,0,13,1187,0.63,2026-07-04T04:37:57+00:00,2026-07-07T04:16:54+00:00,0,0,0,0,0,0,170,1197,1367,1367,
+phase2_day2_daily_followup_20260708_041135,DoorDash,com.dd.doordash,1200,1200,1200,0,0,1200,0.73,2026-06-28T23:28:16+00:00,2026-07-07T03:41:39+00:00,0,0,0,0,0,0,126,1200,1326,1326,
+phase2_day2_daily_followup_20260708_041135,Duolingo,com.duolingo,1200,1200,1200,0,28,1172,0.76,2026-07-06T05:42:10+00:00,2026-07-07T04:15:00+00:00,0,0,0,0,0,0,76,1200,1276,1276,
+phase2_day2_daily_followup_20260708_041135,Google Maps,com.google.android.apps.maps,1200,1200,1200,0,3,1197,0.87,2026-06-30T03:12:23+00:00,2026-07-07T04:05:23+00:00,0,0,0,0,0,0,30,935,965,965,
+phase2_day2_daily_followup_20260708_041135,Netflix,com.netflix.mediaclient,1200,1200,1200,0,2,1198,0.8,2026-06-27T05:51:36+00:00,2026-07-07T04:10:52+00:00,0,0,0,0,0,0,378,1200,1578,1578,
+phase2_day2_daily_followup_20260708_041135,Reddit,com.reddit.frontpage,1200,1200,1200,0,3,1197,0.6,2026-06-27T05:16:47+00:00,2026-07-07T04:16:32+00:00,0,0,0,0,0,0,244,1200,1444,1444,
