@@ -1,0 +1,12 @@
+file_name,path,size_mb
+google_play_reviews_after_day3.sqlite.zip,/content/outputs/google_play_reviews_after_day3.sqlite.zip,10.771821975708008
+phase2_app_level_history_through_day3.csv,/content/outputs/phase2_app_level_history_through_day3.csv,0.0069293975830078125
+phase2_day3_app_level_summary.csv,/content/outputs/phase2_day3_app_level_summary.csv,0.0023336410522460938
+phase2_day3_app_new_insert_ranking.csv,/content/outputs/phase2_day3_app_new_insert_ranking.csv,0.0025501251220703125
+phase2_day3_database_schema_snapshot.csv,/content/outputs/phase2_day3_database_schema_snapshot.csv,0.004557609558105469
+phase2_day3_findings_report.md,/content/outputs/phase2_day3_findings_report.md,0.0055637359619140625
+phase2_day3_output_file_manifest.csv,/content/outputs/phase2_day3_output_file_manifest.csv,0.0010833740234375
+phase2_day3_quality_flags.csv,/content/outputs/phase2_day3_quality_flags.csv,3.2888565063476562
+phase2_day3_run_summary.csv,/content/outputs/phase2_day3_run_summary.csv,0.000904083251953125
+phase2_day3_sample_new_reviews.csv,/content/outputs/phase2_day3_sample_new_reviews.csv,0.1813507080078125
+phase2_repeated_run_history_through_day3.csv,/content/outputs/phase2_repeated_run_history_through_day3.csv,0.0011491775512695312
