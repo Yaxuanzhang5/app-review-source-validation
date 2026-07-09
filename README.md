@@ -1,115 +1,40 @@
-# App Review Source Validation
+# Google Play Review Ingestion Pipeline — Phase 2 Controlled Repeated Runs and Cadence Test
 
-This repository documents a source validation and ingestion pipeline test for public app review data.
+## Project Overview
 
-The main goal is to evaluate whether app review data can be collected repeatedly, stored in a structured database, checked for duplicates, and tracked through run-level summaries.
+This repository contains the Phase 2 Google Play review ingestion pipeline.
 
-The current focus is Google Play reviews using the `google-play-scraper` Python package.
+The goal of this phase is to move beyond a small demo and test whether the pipeline can behave like a real recurring ingestion system. The pipeline collects Google Play reviews, stores them in SQLite, avoids duplicate review inserts, tracks app-level and run-level results, and produces consistent summary outputs for repeated evaluation.
 
----
+The current Phase 2 work includes:
 
-## Latest Status
+1. Controlled repeated runs using the same 10 apps and the same 1,200-review target.
+2. A cadence test comparing the once-daily-style baseline with a same-day second collection run.
+3. Consistent run summaries, app-level summaries, quality flags, schema snapshots, findings reports, and compressed database snapshots.
 
-Phase 2 Day 1 and Phase 2 Day 2 have both been completed.
+## Current Status
 
-The current pipeline has tested:
+Phase 2 has completed:
 
-- larger controlled ingestion across 10 Google Play apps
-- 1,200 newest reviews per app
-- repeated collection using the same database
-- duplicate handling across runs
-- new review insertion after the baseline run
-- run-level and app-level summaries
-- database growth tracking
-- quality flag tracking
-- raw-to-cleaned review linkage
-- ingestion run tracking
-- database relationship checks
+- Day 1 controlled baseline run
+- Day 2 controlled repeated run
+- Day 3 controlled repeated run
+- Cadence Test Run A: same-day second collection / twice-daily test
 
-The latest clean database is stored as a compressed file:
+The latest cadence test continues from the fixed Day 3 SQLite database and keeps the same setup:
 
-```text
-database/google_play_reviews.sqlite.zip
-```
-
-The raw SQLite file is compressed because GitHub browser upload may fail for larger `.sqlite` files.
-
----
-
-## Project Structure
-
-```text
-app-review-source-validation/
-├── database/
-│   └── google_play_reviews.sqlite.zip
-│
-├── notebooks/
-│   ├── Google_Play_Controlled_Scale_Ingestion_Phase2_Day1.ipynb
-│   └── Google_Play_Controlled_Scale_Ingestion_Phase2_Day2.ipynb
-│
-├── outputs/
-│   ├── run_summaries/
-│   │   ├── phase2_day1_run_summary_20260708_034445.csv
-│   │   ├── phase2_day1_app_level_summary_20260708_034445.csv
-│   │   ├── phase2_day1_relationship_checks_20260708_034445.csv
-│   │   ├── phase2_day1_database_row_growth_20260708_034445.csv
-│   │   ├── phase2_day2_run_summary_20260708_041135.csv
-│   │   ├── phase2_day2_app_level_summary_20260708_041135.csv
-│   │   ├── phase2_day2_relationship_checks_20260708_041135.csv
-│   │   ├── phase2_day2_database_row_growth_20260708_041135.csv
-│   │   ├── phase2_day1_day2_comparison_20260708_041135.csv
-│   │   └── phase2_run_summary_history.csv
-│   │
-│   └── quality/
-│       ├── phase2_day1_quality_flag_summary_20260708_034445.csv
-│       └── phase2_day2_quality_flag_summary_20260708_041135.csv
-│
-├── reports/
-│   ├── phase2_day1_controlled_scale_findings_20260708_034445.md
-│   └── phase2_day2_daily_followup_findings_20260708_041135.md
-│
-├── requirements.txt
-└── README.md
-```
-
----
-
-## Phase 2 Overview
-
-Phase 2 tests whether the ingestion pipeline can move beyond a small proof of concept and support a more realistic recurring ingestion process.
-
-The main questions are:
-
-1. Can the pipeline collect a larger controlled batch of reviews?
-2. Can the same database be reused across multiple runs?
-3. Can duplicate reviews be skipped correctly?
-4. Can newly appearing reviews be inserted after the baseline run?
-5. Can each ingestion run be tracked clearly?
-6. Can database relationships remain valid after repeated runs?
-7. Can run summaries show fetched records, inserted rows, duplicates, errors, quality flags, and database growth?
-
----
-
-## Source and Collection Setup
-
-| Item | Value |
-|---|---|
-| Source | Google Play |
-| Python package | `google-play-scraper` |
-| Language | `en` |
-| Country | `us` |
-| Sort order | newest |
-| Apps tested | 10 |
-| Target reviews per app | 1,200 |
-| Target records per run | 12,000 |
-| Database | SQLite |
-| Duplicate rule | `source + app_id + review_id` |
-
----
+- same 10 apps
+- same 1,200-review target per app
+- same Google Play source
+- same language and country setting
+- same SQLite continuation logic
+- same duplicate prevention logic
 
 ## Apps Included
 
-| App Name | Google Play App ID |
+The same 10 apps were used across the Phase 2 controlled repeated runs and Cadence Run A:
+
+| App | Google Play App ID |
 |---|---|
 | YouTube | `com.google.android.youtube` |
 | TikTok | `com.zhiliaoapp.musically` |
@@ -122,341 +47,36 @@ The main questions are:
 | Netflix | `com.netflix.mediaclient` |
 | Reddit | `com.reddit.frontpage` |
 
----
-
-## Database Tables
-
-The Phase 2 database uses these main tables:
-
-| Table | Purpose |
-|---|---|
-| `phase2_ingestion_runs` | Tracks each ingestion run, including runtime, fetched records, inserted records, duplicates, errors, quality flags, and database growth |
-| `phase2_apps` | Stores app metadata and validation status |
-| `phase2_reviews_raw` | Stores raw review records from Google Play |
-| `phase2_reviews_cleaned` | Stores cleaned review text and cleaned fields linked to raw reviews |
-| `phase2_quality_flags` | Stores quality flags at the review/run level |
-| `phase2_app_run_summary` | Stores app-level metrics for each ingestion run |
-
----
-
-## Phase 2 Day 1: Controlled Scale Baseline
-
-Notebook:
+## Repository Structure
 
 ```text
-notebooks/Google_Play_Controlled_Scale_Ingestion_Phase2_Day1.ipynb
-```
-
-Run ID:
-
-```text
-phase2_day1_controlled_scale_20260708_034445
-```
-
-Day 1 was the baseline controlled scale run. It started from the Phase 2 database and inserted the first larger batch of Google Play reviews.
-
-### Day 1 Results
-
-| Metric | Result |
-|---|---:|
-| Apps validated | 10 |
-| Records fetched | 12,000 |
-| New records inserted | 12,000 |
-| Duplicates skipped | 0 |
-| Errors | 0 |
-| Quality flags recorded | 12,633 |
-| Review rows before run | 0 |
-| Review rows after run | 12,000 |
-| Review row growth | 12,000 |
-| Database growth | 23.6602 MB |
-| Run status | completed |
-| Relationship checks | passed |
-
-### Day 1 Interpretation
-
-Day 1 confirmed that the pipeline can collect and insert a larger controlled batch across 10 apps.
-
-The database successfully stored:
-
-- raw reviews
-- cleaned review records
-- app metadata
-- run tracking information
-- app-level run summaries
-- quality flags
-
-The relationship checks passed after insertion, which means the raw reviews, cleaned reviews, quality flags, app records, and run tracking records were linked correctly.
-
----
-
-## Phase 2 Day 2: Daily Follow-Up Run
-
-Notebook:
-
-```text
-notebooks/Google_Play_Controlled_Scale_Ingestion_Phase2_Day2.ipynb
-```
-
-Run ID:
-
-```text
-phase2_day2_daily_followup_20260708_041135
-```
-
-Day 2 used the clean Day 1 database and repeated the same app list and target review volume.
-
-This run tested whether the pipeline could continue from an existing database and correctly skip duplicate reviews while inserting newly appearing reviews.
-
-### Day 2 Results
-
-| Metric | Result |
-|---|---:|
-| Apps validated | 10 |
-| Records fetched | 12,000 |
-| New records inserted | 156 |
-| Duplicates skipped | 11,844 |
-| Errors | 0 |
-| Quality flags recorded | 12,638 |
-| Review rows before run | 12,000 |
-| Review rows after run | 12,156 |
-| Review row growth | 156 |
-| Database growth | 4.6953 MB |
-| Run status | completed |
-| Relationship checks | passed |
-
-### Day 2 App-Level New Insertions
-
-| App | New Records Inserted |
-|---|---:|
-| YouTube | 33 |
-| TikTok | 7 |
-| Spotify | 15 |
-| Instagram | 52 |
-| Uber | 13 |
-| DoorDash | 0 |
-| Duolingo | 28 |
-| Google Maps | 3 |
-| Netflix | 2 |
-| Reddit | 3 |
-| **Total** | **156** |
-
-### Day 2 Interpretation
-
-Day 2 confirmed that repeated ingestion is working correctly.
-
-The pipeline fetched another 12,000 reviews, but most of them already existed in the database from Day 1. These were skipped as duplicates. Only 156 new reviews were inserted.
-
-This result is expected for a repeated collection test and shows that the database can continue from an existing state without duplicating existing review records.
-
----
-
-## Day 1 vs Day 2 Comparison
-
-| Metric | Day 1 Baseline | Day 2 Follow-Up |
-|---|---:|---:|
-| Records fetched | 12,000 | 12,000 |
-| New records inserted | 12,000 | 156 |
-| Duplicates skipped | 0 | 11,844 |
-| Errors | 0 | 0 |
-| Quality flags | 12,633 | 12,638 |
-| Review rows before | 0 | 12,000 |
-| Review rows after | 12,000 | 12,156 |
-| Review row growth | 12,000 | 156 |
-| Database growth | 23.6602 MB | 4.6953 MB |
-| Status | completed | completed |
-| Relationship checks | passed | passed |
-
-### Main Finding
-
-The Day 1 and Day 2 comparison shows that the pipeline can support recurring ingestion.
-
-Day 1 created the controlled baseline. Day 2 reused the same database and successfully identified most fetched reviews as duplicates while inserting only newly observed reviews.
-
-This supports the feasibility of a recurring review ingestion process.
-
----
-
-## Quality Flag Summary
-
-The quality flags were mostly informational.
-
-For Day 2, the recorded quality flags were:
-
-| Flag | Severity | Count |
-|---|---|---:|
-| missing_app_version | info | 2,067 |
-| missing_developer_reply | info | 10,571 |
-
-No major structural quality issues were observed in the Day 2 run.
-
-There were no serious flags such as:
-
-- missing review ID
-- missing content
-- missing score
-- invalid score
-- missing review date
-
-This suggests the fetched review records were structurally usable for ingestion and downstream analysis.
-
----
-
-## Relationship Checks
-
-The database relationship checks passed after both Day 1 and Day 2.
-
-The checks include:
-
-| Check | Purpose |
-|---|---|
-| `raw_reviews_have_app_record` | Confirms every raw review links to an app record |
-| `cleaned_reviews_link_to_raw_reviews` | Confirms every cleaned review links back to a raw review |
-| `quality_flags_link_to_raw_reviews` | Confirms quality flags link to existing raw reviews |
-| `quality_flags_link_to_ingestion_run` | Confirms quality flags link to an ingestion run |
-| `no_duplicate_source_app_review_id` | Confirms no duplicate review records exist for the same source, app, and review ID |
-| `run_reviews_link_to_ingestion_run` | Confirms run-linked reviews point to a valid ingestion run |
-
-All checks passed in the final Day 2 database.
-
----
-
-## Output Files
-
-### Run Summaries
-
-```text
-outputs/run_summaries/phase2_day1_run_summary_20260708_034445.csv
-outputs/run_summaries/phase2_day1_app_level_summary_20260708_034445.csv
-outputs/run_summaries/phase2_day1_relationship_checks_20260708_034445.csv
-outputs/run_summaries/phase2_day1_database_row_growth_20260708_034445.csv
-
-outputs/run_summaries/phase2_day2_run_summary_20260708_041135.csv
-outputs/run_summaries/phase2_day2_app_level_summary_20260708_041135.csv
-outputs/run_summaries/phase2_day2_relationship_checks_20260708_041135.csv
-outputs/run_summaries/phase2_day2_database_row_growth_20260708_041135.csv
-outputs/run_summaries/phase2_day1_day2_comparison_20260708_041135.csv
-
-outputs/run_summaries/phase2_run_summary_history.csv
-```
-
-### Quality Summaries
-
-```text
-outputs/quality/phase2_day1_quality_flag_summary_20260708_034445.csv
-outputs/quality/phase2_day2_quality_flag_summary_20260708_041135.csv
-```
-
-### Findings Reports
-
-```text
-reports/phase2_day1_controlled_scale_findings_20260708_034445.md
-reports/phase2_day2_daily_followup_findings_20260708_041135.md
-```
-
-### Database
-
-```text
-database/google_play_reviews.sqlite.zip
-```
-
-To use the SQLite database locally, unzip:
-
-```text
-database/google_play_reviews.sqlite.zip
-```
-
-The extracted file will be:
-
-```text
-google_play_reviews.sqlite
-```
-
----
-
-## How to Review the Current Results
-
-The quickest files to review are:
-
-1. Run history:
-
-```text
-outputs/run_summaries/phase2_run_summary_history.csv
-```
-
-2. Day 1 vs Day 2 comparison:
-
-```text
-outputs/run_summaries/phase2_day1_day2_comparison_20260708_041135.csv
-```
-
-3. Day 2 findings report:
-
-```text
-reports/phase2_day2_daily_followup_findings_20260708_041135.md
-```
-
-4. Updated compressed database:
-
-```text
-database/google_play_reviews.sqlite.zip
-```
-
----
-
-## Current Conclusion
-
-The Phase 2 controlled ingestion test supports the feasibility of a recurring Google Play review ingestion pipeline.
-
-The pipeline can:
-
-- fetch reviews from multiple apps
-- store raw and cleaned review records
-- track each ingestion run
-- skip duplicate reviews across repeated runs
-- insert newly observed reviews
-- track quality flags
-- summarize app-level and run-level metrics
-- measure database growth
-- preserve database relationships across runs
-
-The Day 2 follow-up run is the key validation step because it shows the pipeline can continue from the Day 1 database instead of starting over.
-
----
-
-## Recommended Next Steps
-
-The next step is to continue controlled repeated runs with the same database and app list.
-
-Recommended next runs:
-
-1. Phase 2 Day 2 evening run  
-   Frequency label: `twice_daily_pm`
-
-2. Phase 2 Day 3 daily follow-up run  
-   Frequency label: `daily_followup`
-
-3. Optional Phase 2 Day 3 evening run  
-   Frequency label: `twice_daily_pm`
-
-These future runs would help compare:
-
-- once-daily vs twice-daily collection
-- same-day duplicate rate
-- next-day new review capture
-- runtime stability across multiple runs
-- app-level differences in review update frequency
-- database growth over time
-
----
-
-## Notes
-
-The current database file is provided as a compressed `.zip` file because the raw SQLite database is large enough to cause issues with GitHub browser upload.
-
-The raw SQLite file should not be uploaded separately unless using Git command line or Git LFS.
-
-For this repo, the current database should be reviewed through:
-
-```text
-database/google_play_reviews.sqlite.zip
-```
+.
+├── README.md
+├── notebooks/
+│   ├── Google_Play_Controlled_Scale_Ingestion_Phase2_Day1.ipynb
+│   ├── Google_Play_Controlled_Scale_Ingestion_Phase2_Day2.ipynb
+│   ├── Google_Play_Controlled_Scale_Ingestion_Phase2_Day3.ipynb
+│   └── Google_Play_Phase2_Cadence_Test_RunA.ipynb
+└── outputs/
+    ├── phase2_day3_run_summary.csv
+    ├── phase2_day3_app_level_summary.csv
+    ├── phase2_day3_quality_flags.csv
+    ├── phase2_repeated_run_history_through_day3.csv
+    ├── phase2_app_level_history_through_day3.csv
+    ├── phase2_day3_app_new_insert_ranking.csv
+    ├── phase2_day3_sample_new_reviews.csv
+    ├── phase2_day3_database_schema_snapshot.csv
+    ├── phase2_day3_findings_report.md
+    ├── phase2_day3_output_file_manifest.csv
+    ├── google_play_reviews_after_day3.sqlite.zip
+    ├── phase2_cadence_runA_run_summary.csv
+    ├── phase2_cadence_runA_app_level_summary.csv
+    ├── phase2_cadence_runA_quality_flags.csv
+    ├── phase2_cadence_comparison_through_runA.csv
+    ├── phase2_cadence_app_comparison_through_runA.csv
+    ├── phase2_cadence_runA_app_new_insert_ranking.csv
+    ├── phase2_cadence_runA_sample_new_reviews.csv
+    ├── phase2_cadence_runA_database_schema_snapshot.csv
+    ├── phase2_cadence_operating_assumption_findings.md
+    ├── phase2_cadence_runA_output_file_manifest.csv
+    └── google_play_reviews_after_cadence_runA.sqlite.zip
