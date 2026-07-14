@@ -2,81 +2,103 @@
 
 ## Project Overview
 
-This repository contains the Phase 2 Google Play review ingestion pipeline.
+This repository contains the technical validation and controlled ingestion work for recurring public app-review collection.
 
-The goal of this phase is to move beyond a small demo and test whether the pipeline can behave like a real recurring ingestion system. The pipeline collects Google Play reviews, stores them in SQLite, avoids duplicate review inserts, tracks app-level and run-level results, and produces consistent summary outputs for repeated evaluation.
+The project began by testing Google Play and iOS App Store public review sources. Phase 2 then focused on Google Play and moved from small technical tests to a persistent SQLite ingestion pipeline with:
 
-The current Phase 2 work includes:
+- repeated review collection
+- raw and cleaned review storage
+- deterministic duplicate prevention
+- app-level and run-level metrics
+- data-quality flags
+- database integrity checks
+- timestamp-based freshness analysis
+- once-daily versus twice-daily cadence evaluation
 
-1. Controlled repeated runs using the same 10 apps and the same 1,200-review target.
-2. A cadence test comparing the once-daily-style baseline with a same-day second collection run.
-3. Consistent run summaries, app-level summaries, quality flags, schema snapshots, findings reports, and compressed database snapshots.
+The latest database contains six completed Phase 2 runs for the same 10 apps under a controlled 1,200-review-per-app setup.
 
-## Current Status
+---
 
-Phase 2 has completed:
+## Current Project Status
 
-- Day 1 controlled baseline run
-- Day 2 controlled repeated run
-- Day 3 controlled repeated run
-- Cadence Test Run A: same-day second collection / twice-daily test
+Phase 2 controlled collection and cadence testing are complete.
 
-The latest cadence test continues from the fixed Day 3 SQLite database and keeps the same setup:
+Final database state:
 
-- same 10 apps
-- same 1,200-review target per app
-- same Google Play source
-- same language and country setting
-- same SQLite continuation logic
-- same duplicate prevention logic
+| Metric | Final value |
+|---|---:|
+| Apps | 10 |
+| Completed Phase 2 runs | 6 |
+| Raw review rows | 34,601 |
+| Cleaned review rows | 34,601 |
+| App-run summary rows | 60 |
+| Quality-flag rows | 75,918 |
+| Uncompressed database size | 84.68 MB |
+| Duplicate review identities | 0 |
+| Raw rows without cleaned rows | 0 |
+| Cleaned rows without raw rows | 0 |
+| Orphan quality flags | 0 |
+| Foreign-key violations | 0 |
+| SQLite integrity check | `ok` |
 
-## Apps Included
+The final validated database is available here:
 
-The same 10 apps were used across the Phase 2 controlled repeated runs and Cadence Run A:
+[`database/google_play_reviews_after_runB_followup.sqlite.zip`](database/google_play_reviews_after_runB_followup.sqlite.zip)
 
-| App | Google Play App ID |
+---
+
+## Controlled Collection Setup
+
+The same configuration was maintained throughout the controlled Phase 2 cadence work.
+
+| Setting | Value |
 |---|---|
-| YouTube | `com.google.android.youtube` |
-| TikTok | `com.zhiliaoapp.musically` |
-| Spotify | `com.spotify.music` |
-| Instagram | `com.instagram.android` |
-| Uber | `com.ubercab` |
-| DoorDash | `com.dd.doordash` |
-| Duolingo | `com.duolingo` |
-| Google Maps | `com.google.android.apps.maps` |
-| Netflix | `com.netflix.mediaclient` |
-| Reddit | `com.reddit.frontpage` |
+| Source | Google Play |
+| Library | `google-play-scraper` |
+| Collection method | `reviews()` |
+| Sort order | `Sort.NEWEST` |
+| Language | English (`en`) |
+| Country | United States (`us`) |
+| Apps | 10 fixed apps |
+| Target | 1,200 reviews per app |
+| Maximum expected batch | 12,000 reviews per run |
+| Request delay | 2 seconds between app requests |
+| Database | SQLite |
+| Duplicate identity | `source + app_id + review_id` |
 
-## Repository Structure
+### Fixed App List
+
+1. YouTube — `com.google.android.youtube`
+2. TikTok — `com.zhiliaoapp.musically`
+3. Spotify — `com.spotify.music`
+4. Instagram — `com.instagram.android`
+5. Uber — `com.ubercab`
+6. DoorDash — `com.dd.doordash`
+7. Duolingo — `com.duolingo`
+8. Google Maps — `com.google.android.apps.maps`
+9. Netflix — `com.netflix.mediaclient`
+10. Reddit — `com.reddit.frontpage`
+
+The app list, order, source settings, target size, schema, database continuation, and duplicate-prevention logic were kept unchanged during the controlled cadence tests.
+
+---
+
+## Database Design
+
+The Phase 2 database contains six main tables:
+
+| Table | Purpose |
+|---|---|
+| `phase2_apps` | Fixed app configuration and store metadata |
+| `phase2_ingestion_runs` | Run-level status, timing, totals, and database growth |
+| `phase2_app_run_summary` | App-level fetched, inserted, duplicate, quality, and runtime metrics |
+| `phase2_reviews_raw` | Original normalized review records and source payloads |
+| `phase2_reviews_cleaned` | Cleaned review content and analysis-ready fields |
+| `phase2_quality_flags` | Run-scoped data-quality findings |
+
+### Duplicate Prevention
+
+Each review receives a deterministic `review_key` derived from:
 
 ```text
-.
-├── README.md
-├── notebooks/
-│   ├── Google_Play_Controlled_Scale_Ingestion_Phase2_Day1.ipynb
-│   ├── Google_Play_Controlled_Scale_Ingestion_Phase2_Day2.ipynb
-│   ├── Google_Play_Controlled_Scale_Ingestion_Phase2_Day3.ipynb
-│   └── Google_Play_Phase2_Cadence_Test_RunA.ipynb
-└── outputs/
-    ├── phase2_day3_run_summary.csv
-    ├── phase2_day3_app_level_summary.csv
-    ├── phase2_day3_quality_flags.csv
-    ├── phase2_repeated_run_history_through_day3.csv
-    ├── phase2_app_level_history_through_day3.csv
-    ├── phase2_day3_app_new_insert_ranking.csv
-    ├── phase2_day3_sample_new_reviews.csv
-    ├── phase2_day3_database_schema_snapshot.csv
-    ├── phase2_day3_findings_report.md
-    ├── phase2_day3_output_file_manifest.csv
-    ├── google_play_reviews_after_day3.sqlite.zip
-    ├── phase2_cadence_runA_run_summary.csv
-    ├── phase2_cadence_runA_app_level_summary.csv
-    ├── phase2_cadence_runA_quality_flags.csv
-    ├── phase2_cadence_comparison_through_runA.csv
-    ├── phase2_cadence_app_comparison_through_runA.csv
-    ├── phase2_cadence_runA_app_new_insert_ranking.csv
-    ├── phase2_cadence_runA_sample_new_reviews.csv
-    ├── phase2_cadence_runA_database_schema_snapshot.csv
-    ├── phase2_cadence_operating_assumption_findings.md
-    ├── phase2_cadence_runA_output_file_manifest.csv
-    └── google_play_reviews_after_cadence_runA.sqlite.zip
+source | app_id | review_id
