@@ -143,13 +143,17 @@ Complete six-run history:
 
 [`outputs/phase2_complete_run_history.csv`](outputs/phase2_complete_run_history.csv)
 
-### Run B First Collection
+---
 
-The Run B First Collection occurred approximately 100.65 hours after Cadence Run A.
+## Run B First Collection Baseline
 
-Because this gap was much longer than the controlled higher-frequency intervals, it was used as the baseline for the Run B follow-up and was not treated as a separate twice-daily outcome.
+The Run B First Collection established the database and timestamp baseline used by the later Run B Follow-up Collection.
 
-Run B First Collection results:
+It occurred approximately 100.65 hours after Cadence Run A.
+
+Because this interval was much longer than the controlled higher-frequency intervals, the First Collection was not treated as an independent twice-daily cadence outcome. Its purpose was to create a clean and validated starting point for the Run B follow-up.
+
+### Run B First Collection Results
 
 | Metric | Result |
 |---|---:|
@@ -158,11 +162,55 @@ Run B First Collection results:
 | Duplicates skipped | 3,362 |
 | New insert rate | 71.98% |
 | Duplicate rate | 28.02% |
-| Reviews posted after the prior run boundary | 8,015 |
+| Reviews posted after the prior Run A boundary | 8,015 |
 | Older reviews surfaced later | 623 |
 | Wall-clock runtime | 30.76 s |
 | Database row growth | 8,638 |
 | Database size growth | 18.56 MB |
+| Collection errors | 0 |
+
+### Run B First Collection Workflow
+
+The First Collection workflow included:
+
+- continuation from the Cadence Run A database
+- validation of the input database checkpoint
+- collection of 1,200 reviews for each of the same 10 apps
+- raw and cleaned review insertion
+- deterministic duplicate prevention
+- app-level ingestion summaries
+- database integrity validation
+- timestamp classification
+- pre-run and post-run database snapshots
+- creation of the checkpoint used by the Run B Follow-up Notebook
+
+### Run B First Collection Notebook
+
+[`notebooks/Google_Play_Phase2_Cadence_Test_RunB_First_Collection.ipynb`](notebooks/Google_Play_Phase2_Cadence_Test_RunB_First_Collection.ipynb)
+
+### Run B First Collection Database
+
+[`database/google_play_reviews_after_runB_first_collection.sqlite.zip`](database/google_play_reviews_after_runB_first_collection.sqlite.zip)
+
+### Complete First Collection Checkpoint
+
+This checkpoint contains the validated First Collection database and supporting output files used by the Follow-up Notebook:
+
+[`database/phase2_cadence_runB_first_collection_checkpoint_20260714_020137_utc.zip`](database/phase2_cadence_runB_first_collection_checkpoint_20260714_020137_utc.zip)
+
+### Run B First Collection Baseline Outputs
+
+- [`outputs/phase2_cadence_runB_first_collection_app_summary.csv`](outputs/phase2_cadence_runB_first_collection_app_summary.csv)
+- [`outputs/phase2_cadence_runB_first_collection_completed_run_record.csv`](outputs/phase2_cadence_runB_first_collection_completed_run_record.csv)
+- [`outputs/phase2_cadence_runB_first_collection_database_validation.csv`](outputs/phase2_cadence_runB_first_collection_database_validation.csv)
+- [`outputs/phase2_cadence_runB_first_collection_metadata.json`](outputs/phase2_cadence_runB_first_collection_metadata.json)
+- [`outputs/phase2_cadence_runB_first_collection_pre_run_app_snapshot.csv`](outputs/phase2_cadence_runB_first_collection_pre_run_app_snapshot.csv)
+- [`outputs/phase2_cadence_runB_first_collection_pre_run_snapshot.csv`](outputs/phase2_cadence_runB_first_collection_pre_run_snapshot.csv)
+- [`outputs/phase2_cadence_runB_first_collection_prior_run_history.csv`](outputs/phase2_cadence_runB_first_collection_prior_run_history.csv)
+- [`outputs/phase2_cadence_runB_first_collection_timestamp_audit.csv`](outputs/phase2_cadence_runB_first_collection_timestamp_audit.csv)
+- [`outputs/phase2_cadence_runB_first_collection_timestamp_summary.csv`](outputs/phase2_cadence_runB_first_collection_timestamp_summary.csv)
+- [`outputs/phase2_cadence_runB_first_collection_timestamp_validation.csv`](outputs/phase2_cadence_runB_first_collection_timestamp_validation.csv)
+- [`outputs/phase2_cadence_runB_first_collection_checkpoint_manifest.csv`](outputs/phase2_cadence_runB_first_collection_checkpoint_manifest.csv)
 
 ---
 
@@ -175,14 +223,16 @@ Two comparable higher-frequency tests were evaluated.
 - Previous collection: Day 3
 - Mean app-specific interval: 17.16 hours
 - Fixed apps: 10
-- Target per app: 1,200
+- Target per app: 1,200 reviews
 
 ### Cadence Run B
 
 - Previous collection: Run B First Collection
 - Mean app-specific interval: 14.66 hours
 - Fixed apps: 10
-- Target per app: 1,200
+- Target per app: 1,200 reviews
+
+The Run B cadence result is based on the change between the First Collection and the Follow-up Collection.
 
 ---
 
@@ -253,7 +303,7 @@ Across Cadence Run A and Cadence Run B:
 
 ### Main Finding
 
-All 8,148 new database inserts across the two cadence tests had review timestamps at or before the preceding app-specific collection boundary.
+All 8,148 new database inserts across the two controlled cadence tests had review timestamps at or before the preceding app-specific collection boundary.
 
 The records were new to the database because they entered the returned review window later.
 
@@ -523,6 +573,8 @@ The final package validations completed without failures.
 - [`outputs/phase2_cadence_runA_runB_comparison_validation.csv`](outputs/phase2_cadence_runA_runB_comparison_validation.csv)
 - [`outputs/phase2_cadence_runA_runB_final_report_validation.csv`](outputs/phase2_cadence_runA_runB_final_report_validation.csv)
 - [`outputs/phase2_cadence_runA_timestamp_validation.csv`](outputs/phase2_cadence_runA_timestamp_validation.csv)
+- [`outputs/phase2_cadence_runB_first_collection_database_validation.csv`](outputs/phase2_cadence_runB_first_collection_database_validation.csv)
+- [`outputs/phase2_cadence_runB_first_collection_timestamp_validation.csv`](outputs/phase2_cadence_runB_first_collection_timestamp_validation.csv)
 - [`outputs/phase2_cadence_runB_followup_database_validation.csv`](outputs/phase2_cadence_runB_followup_database_validation.csv)
 - [`outputs/phase2_cadence_runB_followup_final_database_validation.csv`](outputs/phase2_cadence_runB_followup_final_database_validation.csv)
 - [`outputs/phase2_cadence_runB_followup_timestamp_validation.csv`](outputs/phase2_cadence_runB_followup_timestamp_validation.csv)
@@ -541,11 +593,12 @@ The completed final package contains:
 - run-level comparison
 - app-level recommendations
 - Run A timestamp reconstruction
-- Run B timestamp audit
+- Run B First Collection baseline records
+- Run B Follow-up timestamp audit
 - source-freshness diagnostic
 - runtime metrics
 - metadata
-- run history
+- complete run history
 - validation outputs
 - SHA-256 manifest
 
@@ -567,7 +620,13 @@ The final report completeness validation confirms that the report includes:
 
 ## Key Repository Files
 
-### Latest Notebook
+### Run B First Collection Notebook
+
+[`notebooks/Google_Play_Phase2_Cadence_Test_RunB_First_Collection.ipynb`](notebooks/Google_Play_Phase2_Cadence_Test_RunB_First_Collection.ipynb)
+
+This notebook established the validated Run B baseline and generated the checkpoint used by the follow-up collection.
+
+### Run B Follow-up Notebook
 
 [`notebooks/Google_Play_Phase2_Cadence_Test_RunB_Followup_Collection.ipynb`](notebooks/Google_Play_Phase2_Cadence_Test_RunB_Followup_Collection.ipynb)
 
@@ -576,7 +635,7 @@ The latest notebook includes:
 - checkpoint upload and validation
 - database continuation
 - follow-up run creation
-- controlled collection
+- controlled review collection
 - app-level ingestion metrics
 - post-run database validation
 - app-specific timestamp audit
@@ -597,7 +656,17 @@ The latest notebook includes:
 
 [`reports/phase2_cadence_runA_runB_final_report.md`](reports/phase2_cadence_runA_runB_final_report.md)
 
-### Final Database
+### Run B Database Checkpoints
+
+Run B First Collection database:
+
+[`database/google_play_reviews_after_runB_first_collection.sqlite.zip`](database/google_play_reviews_after_runB_first_collection.sqlite.zip)
+
+Complete First Collection checkpoint used by the Follow-up Notebook:
+
+[`database/phase2_cadence_runB_first_collection_checkpoint_20260714_020137_utc.zip`](database/phase2_cadence_runB_first_collection_checkpoint_20260714_020137_utc.zip)
+
+Final database after the Run B Follow-up Collection:
 
 [`database/google_play_reviews_after_runB_followup.sqlite.zip`](database/google_play_reviews_after_runB_followup.sqlite.zip)
 
@@ -627,6 +696,8 @@ app-review-source-validation/
 │   ├── google_play_reviews.sqlite.zip
 │   ├── google_play_reviews_after_day3.sqlite.zip
 │   ├── google_play_reviews_after_cadence_runA.sqlite.zip
+│   ├── google_play_reviews_after_runB_first_collection.sqlite.zip
+│   ├── phase2_cadence_runB_first_collection_checkpoint_20260714_020137_utc.zip
 │   └── google_play_reviews_after_runB_followup.sqlite.zip
 ├── database_design/
 │   └── SQLite schema and database design files
@@ -636,12 +707,14 @@ app-review-source-validation/
 │   ├── Phase 2 Day 2 notebook
 │   ├── Phase 2 Day 3 notebook
 │   ├── Google_Play_Phase2_Cadence_Test_RunA.ipynb
+│   ├── Google_Play_Phase2_Cadence_Test_RunB_First_Collection.ipynb
 │   └── Google_Play_Phase2_Cadence_Test_RunB_Followup_Collection.ipynb
 ├── outputs/
 │   ├── Phase 1 validation outputs
 │   ├── Phase 2 repeated-run outputs
 │   ├── Run A cadence outputs
-│   ├── Run B follow-up outputs
+│   ├── Run B First Collection baseline outputs
+│   ├── Run B Follow-up outputs
 │   ├── timestamp audits
 │   ├── source-freshness diagnostics
 │   ├── runtime metrics
@@ -654,6 +727,40 @@ app-review-source-validation/
 ├── .gitignore
 ├── README.md
 └── requirements.txt
+```
+
+---
+
+## Run B Reproduction Order
+
+The completed Run B workflow should be read in this order:
+
+1. Open `Google_Play_Phase2_Cadence_Test_RunB_First_Collection.ipynb`.
+2. Review the First Collection baseline outputs.
+3. Use `phase2_cadence_runB_first_collection_checkpoint_20260714_020137_utc.zip` as the validated checkpoint.
+4. Open `Google_Play_Phase2_Cadence_Test_RunB_Followup_Collection.ipynb`.
+5. Review the timestamp and source-freshness analysis.
+6. Review the Run A versus Run B comparison.
+7. Review the final app-level cadence recommendation.
+
+Workflow:
+
+```text
+Cadence Run A database
+        ↓
+Run B First Collection Notebook
+        ↓
+First Collection database and baseline outputs
+        ↓
+Validated First Collection checkpoint
+        ↓
+Run B Follow-up Notebook
+        ↓
+Final database and timestamp audit
+        ↓
+Run A versus Run B comparison
+        ↓
+Final cadence recommendation
 ```
 
 ---
@@ -683,7 +790,9 @@ For a new controlled collection:
 11. Export the database, CSV files, metadata, report, and manifest.
 12. Verify every validation check before publishing results.
 
-The latest notebook records the exact checkpoint and controlled configuration used for the completed Run B follow-up test.
+The First Collection Notebook records how the Run B baseline checkpoint was created.
+
+The Follow-up Notebook records the exact checkpoint and controlled configuration used for the completed Run B cadence test.
 
 ---
 
@@ -698,6 +807,8 @@ The latest notebook records the exact checkpoint and controlled configuration us
 - Database size growth is reported only at run level because SQLite file-page growth cannot be reliably assigned to individual apps.
 - The approximately 24-hour returned-window lag is an observed result from the controlled tests, not a universal Google Play rule.
 - The cadence recommendations apply to the tested apps, source settings, 1,200-review returned window, and recorded collection periods.
+- The First Collection was used as the Run B baseline because its interval from Cadence Run A was substantially longer than the controlled follow-up interval.
+- The Run B cadence result is based on the interval between the First Collection and the Follow-up Collection.
 
 ---
 
@@ -730,4 +841,4 @@ The final operating recommendation is:
 - continue monitoring TikTok and Spotify
 - retain once-daily collection for Uber, DoorDash, Duolingo, Google Maps, Netflix, and Reddit
 
-This recommendation separates posting-time freshness from returned-window coverage and is based on the validated database, timestamp audits, source-freshness diagnostics, and app-level cadence results stored in this repository.
+This recommendation separates posting-time freshness from returned-window coverage and is based on the validated database, First Collection baseline, Follow-up Collection results, timestamp audits, source-freshness diagnostics, and app-level cadence comparison stored in this repository.
