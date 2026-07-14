@@ -1,0 +1,13 @@
+validation_check,passed
+10_app_summary_rows,True
+12000_reviews_fetched,True
+new_plus_duplicates_match_fetched,True
+run_raw_rows_match_new_inserts,True
+run_cleaned_rows_match_new_inserts,True
+database_growth_matches_new_inserts,True
+raw_and_cleaned_totals_match,True
+no_duplicate_review_identities,True
+no_raw_rows_without_cleaned_rows,True
+no_cleaned_rows_without_raw_rows,True
+no_orphan_quality_flags,True
+no_app_errors,True

@@ -1,0 +1,11 @@
+app_name,app_id,database_review_rows,earliest_review_timestamp,latest_review_timestamp
+YouTube,com.google.android.youtube,3632,2026-07-06T09:09:19+00:00,2026-07-08T21:13:22+00:00
+TikTok,com.zhiliaoapp.musically,2465,2026-07-05T03:11:35+00:00,2026-07-08T21:14:15+00:00
+Spotify,com.spotify.music,2518,2026-07-05T12:54:10+00:00,2026-07-08T21:14:19+00:00
+Instagram,com.instagram.android,3650,2026-07-06T13:35:02+00:00,2026-07-08T21:12:32+00:00
+Uber,com.ubercab,1932,2026-07-04T03:52:16+00:00,2026-07-08T21:12:10+00:00
+DoorDash,com.dd.doordash,1403,2026-06-28T23:28:16+00:00,2026-07-08T21:03:08+00:00
+Duolingo,com.duolingo,2090,2026-07-06T04:53:03+00:00,2026-07-08T15:57:17+00:00
+Google Maps,com.google.android.apps.maps,1618,2026-06-30T02:30:54+00:00,2026-07-08T21:14:19+00:00
+Netflix,com.netflix.mediaclient,1471,2026-06-27T05:44:07+00:00,2026-07-08T21:01:32+00:00
+Reddit,com.reddit.frontpage,1431,2026-06-27T04:42:08+00:00,2026-07-08T20:43:50+00:00
