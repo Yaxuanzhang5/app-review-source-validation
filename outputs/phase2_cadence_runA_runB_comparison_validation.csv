@@ -1,0 +1,12 @@
+validation_check,passed
+two_cadence_runs_present,True
+both_runs_fetched_12000,True
+runA_new_inserts_match_4395,True
+runB_new_inserts_match_3753,True
+zero_posted_between_in_both_tests,True
+all_new_inserts_classified_as_older,True
+all_10_apps_compared,True
+all_apps_have_zero_true_posted_count,True
+all_apps_received_one_recommendation,True
+both_tests_show_over_20_hour_median_source_lag,True
+both_cadence_runs_have_zero_errors,True

@@ -1,0 +1,14 @@
+validation_check,passed
+six_completed_runs,True
+sixty_app_summary_rows,True
+raw_rows_equal_34601,True
+cleaned_rows_equal_34601,True
+raw_and_cleaned_totals_match,True
+no_duplicate_review_identities,True
+no_raw_rows_without_cleaned,True
+no_cleaned_rows_without_raw,True
+no_orphan_quality_flags,True
+no_foreign_key_violations,True
+two_final_runB_records_present,True
+runB_followup_completed,True
+runB_followup_growth_matches_3753,True

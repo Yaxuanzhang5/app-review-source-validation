@@ -1,0 +1,8 @@
+validation_check,passed
+all_10_apps_present,True
+all_timestamps_parsed,True
+previous_latest_not_after_previous_fetch,True
+followup_latest_not_after_followup_fetch,True
+all_source_lags_nonnegative,True
+returned_window_did_not_move_backward,True
+timestamp_audit_found_zero_posted_between,True

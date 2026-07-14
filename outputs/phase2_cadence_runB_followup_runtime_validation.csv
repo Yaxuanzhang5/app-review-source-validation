@@ -1,0 +1,6 @@
+validation_check,passed
+two_runB_records_found,True
+both_runB_records_completed,True
+first_collection_wall_clock_saved,True
+followup_wall_clock_saved,True
+processing_runtime_preserved_separately,True

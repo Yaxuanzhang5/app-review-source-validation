@@ -1,0 +1,58 @@
+{
+  "project": "Google Play Phase 2 controlled cadence test",
+  "source": "google_play",
+  "language": "en",
+  "country": "us",
+  "app_count": 10,
+  "target_reviews_per_app": 1200,
+  "duplicate_identity": "source + app_id + review_id",
+  "runA_run_id": "phase2_cadence_runA_twice_daily_test_20260709_210858",
+  "runB_first_collection_run_id": "phase2_cadence_runB_first_collection_20260714_014620",
+  "runB_followup_run_id": "phase2_cadence_runB_followup_collection_20260714_163017",
+  "runA_interval_hours": 17.16104940138889,
+  "runB_interval_hours": 14.664605768027775,
+  "runA_new_database_inserts": 4395,
+  "runB_new_database_inserts": 3753,
+  "runA_posted_between_collections": 0,
+  "runB_posted_between_collections": 0,
+  "runA_median_source_lag_hours": 24.04008215361111,
+  "runB_median_source_lag_hours": 24.042507159444447,
+  "high_window_turnover_threshold": 0.8,
+  "duplicate_heavy_threshold": 0.7,
+  "twice_daily_coverage_candidates": [
+    "YouTube",
+    "Instagram"
+  ],
+  "once_daily_candidates": [
+    "Uber",
+    "DoorDash",
+    "Duolingo",
+    "Google Maps",
+    "Netflix",
+    "Reddit"
+  ],
+  "monitor_candidates": [
+    "TikTok",
+    "Spotify"
+  ],
+  "final_database_rows": 34601,
+  "final_cleaned_rows": 34601,
+  "final_quality_flag_rows": 75918,
+  "final_database_size_mb": 84.6796875,
+  "completed_run_count": 6,
+  "database_sha256": "a26f6db1b16b35d7763fb8f6e9ce4048ecd3b947749811cc5c34c3d099f3cd69",
+  "exported_at": "2026-07-14T16:54:21.185356+00:00",
+  "final_report_version": "complete_v2",
+  "final_report_completed_at": "2026-07-14T17:03:10.517507+00:00",
+  "final_report_includes": [
+    "Run B first-collection baseline",
+    "run-level timestamp ranges",
+    "app-level new insert counts",
+    "app-level duplicate rates",
+    "app-level processing runtime",
+    "app-level timestamp ranges",
+    "timestamp-verified posted-between counts",
+    "run-level database growth",
+    "app-level cadence recommendations"
+  ]
+}

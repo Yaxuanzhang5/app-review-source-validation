@@ -1,0 +1,16 @@
+validation_check,passed
+contains_controlled_setup,True
+contains_first_collection_baseline,True
+contains_run_level_comparison,True
+contains_runA_app_results,True
+contains_runB_app_results,True
+contains_app_runtime,True
+contains_timestamp_ranges,True
+contains_database_growth_note,True
+contains_first_collection_8638,True
+contains_runA_4395,True
+contains_runB_3753,True
+contains_zero_posted_finding,True
+contains_all_10_apps,True
+contains_final_recommendation,True
+contains_measurement_notes,True
