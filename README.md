@@ -1,79 +1,41 @@
-# Google Play Review Ingestion Pipeline — Phase 2 Controlled Repeated Runs and Cadence Test
+# App Review Source Validation and Google Play Recurring Ingestion Pipeline
 
-## Project Overview
+## Project overview
 
-This repository contains the technical validation and controlled ingestion work for recurring public app-review collection.
+This repository documents the technical validation, database design, recurring ingestion testing, cadence analysis, and monitoring implementation for a public app-review data pipeline.
 
-The project began by validating public review access for Google Play and the iOS App Store. Phase 2 then focused on Google Play and expanded the work into a persistent SQLite ingestion pipeline that supports:
+The work began by comparing Google Play and the iOS App Store as possible recurring review sources. Based on the source-validation results, Google Play was selected as the primary source for the first ingestion pilot. The project then moved through exploratory data-quality analysis, relational database design, automated repeated ingestion, controlled scale testing, cadence testing, and an automated monitoring layer.
 
-- repeated review collection
-- raw and cleaned review storage
-- deterministic duplicate prevention
-- app-level and run-level metrics
-- data-quality flags
-- database integrity checks
-- timestamp-based freshness analysis
-- source returned-window analysis
-- once-daily versus twice-daily cadence evaluation
+The current pipeline uses Google Play reviews collected in English for the United States and stores raw reviews, cleaned review text, ingestion-run history, app-level run summaries, and quality flags in SQLite.
 
-The final Phase 2 database contains six completed runs using the same 10 apps and a controlled target of 1,200 reviews per app.
+## Current project status
 
----
+The following stages are complete:
 
-## Current Project Status
+1. Google Play and iOS source feasibility validation
+2. Repeated-run stability and freshness testing
+3. Google Play 10-app exploratory data-quality analysis
+4. SQL database schema design
+5. Automated recurring-ingestion pipeline prototype
+6. Phase 2 controlled 10-app scale testing
+7. Run A and Run B cadence analysis
+8. Automated ingestion monitoring layer
 
-Phase 2 controlled repeated collection and cadence testing are complete.
+The current operating recommendation is:
 
-### Final Database State
+- use Google Play as the primary recurring review source
+- use once-daily collection as the default schedule
+- consider twice-daily collection only for high-turnover apps such as YouTube and Instagram when returned-window coverage is more important than efficiency
+- keep duplicate-heavy apps on once-daily collection
+- use the automated monitoring report to review each new run
 
-| Metric | Final Value |
-|---|---:|
-| Fixed apps | 10 |
-| Completed Phase 2 runs | 6 |
-| Raw review rows | 34,601 |
-| Cleaned review rows | 34,601 |
-| App-run summary rows | 60 |
-| Quality-flag rows | 75,918 |
-| Uncompressed database size | 84.68 MB |
-| Duplicate review identities | 0 |
-| Raw rows without cleaned rows | 0 |
-| Cleaned rows without raw rows | 0 |
-| Orphan quality flags | 0 |
-| Foreign-key violations | 0 |
-| SQLite integrity check | `ok` |
+Additional cadence testing is not currently required. The next operational focus is monitoring and gradual threshold recalibration as more routine runs become available.
 
-Final validated database:
+## Test applications
 
-[`database/google_play_reviews_after_runB_followup.sqlite.zip`](database/google_play_reviews_after_runB_followup.sqlite.zip)
+The controlled 10-app setup uses:
 
----
-
-## Controlled Collection Setup
-
-The same configuration was maintained throughout the controlled Phase 2 cadence tests.
-
-| Setting | Value |
-|---|---|
-| Source | Google Play |
-| Python library | `google-play-scraper` |
-| Collection function | `reviews()` |
-| Sort order | `Sort.NEWEST` |
-| Language | English (`en`) |
-| Country | United States (`us`) |
-| Fixed app count | 10 |
-| Target per app | 1,200 reviews |
-| Expected total per run | 12,000 reviews |
-| Request delay | 2 seconds between app requests |
-| Database | SQLite |
-| Duplicate identity | `source + app_id + review_id` |
-
-The app list, app order, source settings, review target, database schema, database continuation, and duplicate-prevention logic remained unchanged during the controlled cadence tests.
-
----
-
-## Fixed App List
-
-| App | Google Play Package ID |
+| App | Google Play app ID |
 |---|---|
 | YouTube | `com.google.android.youtube` |
 | TikTok | `com.zhiliaoapp.musically` |
@@ -86,759 +48,337 @@ The app list, app order, source settings, review target, database schema, databa
 | Netflix | `com.netflix.mediaclient` |
 | Reddit | `com.reddit.frontpage` |
 
----
+## Phase 1: source validation
 
-## Database Design
+### Google Play
 
-The Phase 2 SQLite database contains six main tables.
+The initial Google Play validation used YouTube, TikTok, and Spotify with a target of 2,000 newest reviews per app.
 
-| Table | Purpose |
-|---|---|
-| `phase2_apps` | Fixed app configuration and store metadata |
-| `phase2_ingestion_runs` | Run-level timing, status, totals, runtime, and database growth |
-| `phase2_app_run_summary` | App-level fetched, inserted, duplicate, quality, and runtime metrics |
-| `phase2_reviews_raw` | Normalized source records and original review payloads |
-| `phase2_reviews_cleaned` | Cleaned review text and analysis-ready fields |
-| `phase2_quality_flags` | Run-scoped data-quality findings |
+Key results:
 
-### Duplicate Prevention
+- 6,000 reviews were returned across the three apps
+- each app returned the requested 2,000 reviews
+- review IDs were unique within each app batch
+- core fields and review timestamps were available
+- current reviews were returned
+- repeated collection was technically feasible
 
-Each review receives a deterministic `review_key` based on:
+Google Play provided the most consistent combination of volume, metadata, pagination support, and recurring-ingestion behavior.
+
+### iOS App Store public feeds
+
+The iOS public review feeds were technically accessible, but the results were more dependent on app, country, and page availability. Some app-country combinations returned usable data, while others returned empty or lower-volume results. Cross-country retrieval also produced more duplicate and coverage-management issues.
+
+The iOS source remains useful as a secondary or supplementary source, but it was not selected as the primary source for the first recurring-ingestion pipeline.
+
+## Google Play exploratory data-quality analysis
+
+The expanded Google Play analysis used the same 10 apps later adopted for Phase 2, with 1,200 newest reviews per app.
+
+Key results:
+
+- 12,000 reviews were collected
+- all 12,000 review identities were unique under the tested batch
+- core review IDs, scores, and timestamps were complete
+- app-version and developer-reply fields were naturally incomplete for many reviews
+- repeated or generic review text existed even when review IDs were unique
+- approximately 39.5% of reviews met at least one low-signal text condition in the exploratory quality analysis
+
+These results supported keeping the original response fields, preserving raw and cleaned text separately, and recording quality flags instead of deleting potentially low-signal reviews.
+
+## Database and deduplication design
+
+The pipeline uses a relational SQLite design to keep source metadata, ingestion history, review records, cleaned text, and quality flags linked and reviewable.
+
+The central duplicate identity is:
 
 ```text
-source | app_id | review_id
+source + app_id + review_id
 ```
 
-The same review identity is reused across repeated runs.
+This identity prevents the same source review from being inserted as a new database row during later runs.
 
-When an already stored review is returned again:
+The database design supports:
 
-- the review is not inserted a second time
-- the record is counted as a skipped duplicate
-- the existing raw and cleaned database relationship remains unchanged
+- app and source metadata
+- run-level ingestion metadata
+- app-level run targets and summaries
+- raw review fields and raw JSON
+- cleaned review text linked to the raw review
+- review and collection timestamps
+- quality flags
+- duplicate prevention
+- run-level and app-level validation
 
-This design supports:
+The schema documentation is stored in:
 
-- idempotent repeated ingestion
-- persistent database continuation
-- duplicate-rate measurement
-- review lineage
-- raw-to-cleaned consistency checks
-- app-level and run-level comparison
+- `database_design/google_play_review_schema.md`
+- `database_design/schema.sql`
 
----
+The primary working database is stored under `database/`.
 
-## Phase 2 Run History
+## Automated recurring-ingestion pipeline
 
-| Run | Role | Reviews Fetched | New DB Inserts | Duplicates Skipped | New Insert Rate | Duplicate Rate | Runtime | DB Row Growth |
-|---|---|---:|---:|---:|---:|---:|---:|---:|
-| Day 1 | Initial controlled baseline | 12,000 | 12,000 | 0 | 100.00% | 0.00% | 23.27 s | 12,000 |
-| Day 2 | Early repeated follow-up | 12,000 | 156 | 11,844 | 1.30% | 98.70% | 75.80 s | 156 |
-| Day 3 | Controlled repeated baseline | 12,000 | 5,659 | 6,341 | 47.16% | 52.84% | 29.27 s | 5,659 |
-| Cadence Run A | First higher-frequency cadence test | 12,000 | 4,395 | 7,605 | 36.62% | 63.38% | 28.14 s | 4,395 |
-| Run B First Collection | Baseline for the Run B follow-up | 12,000 | 8,638 | 3,362 | 71.98% | 28.02% | 30.76 s | 8,638 |
-| Cadence Run B | Second higher-frequency cadence test | 12,000 | 3,753 | 8,247 | 31.27% | 68.73% | 30.02 s | 3,753 |
+Before the controlled 10-app phase, the automated pipeline was tested through repeated collections using a smaller three-app database. The prototype confirmed that the pipeline could:
 
-Complete six-run history:
+- record a separate ingestion-run row for each execution
+- preserve app-level run summaries
+- insert only database-new review identities
+- skip existing review identities
+- keep raw and cleaned review text linked
+- preserve quality flags
+- maintain relational and foreign-key integrity across repeated runs
 
-[`outputs/phase2_complete_run_history.csv`](outputs/phase2_complete_run_history.csv)
+The controlled Phase 2 work then expanded the same operating logic to 10 apps and 1,200 requested reviews per app.
 
----
+## Phase 2: controlled scale and repeated runs
 
-## Run B First Collection Baseline
+### Fixed setup
 
-The Run B First Collection established the database and timestamp baseline used by the later Run B Follow-up Collection.
+- Source: Google Play
+- Apps: 10
+- Target: 1,200 newest reviews per app
+- Total requested per run: 12,000
+- Language: English
+- Country: United States
+- Sort order: newest
+- Duplicate identity: `source + app_id + review_id`
 
-It occurred approximately 100.65 hours after Cadence Run A.
+### Complete run history
 
-Because this interval was much longer than the controlled higher-frequency intervals, the First Collection was not treated as an independent twice-daily cadence outcome. Its purpose was to create a clean and validated starting point for the Run B follow-up.
+| Run | Frequency label | Runtime | Fetched | New inserts | Duplicates skipped | Duplicate rate | Errors | Review rows after | DB growth |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Phase 2 Day 1 | Once-daily baseline | 23.27 s | 12,000 | 12,000 | 0 | 0.00% | 0 | 12,000 | 23.66 MB |
+| Phase 2 Day 2 | Daily follow-up | 75.80 s | 12,000 | 156 | 11,844 | 98.70% | 0 | 12,156 | 4.70 MB |
+| Phase 2 Day 3 | Controlled repeated run | 29.27 s | 12,000 | 5,659 | 6,341 | 52.84% | 0 | 17,815 | 13.57 MB |
+| Cadence Run A | Same-day follow-up | 28.14 s | 12,000 | 4,395 | 7,605 | 63.38% | 0 | 22,210 | 11.76 MB |
+| Run B first collection | New Run B baseline | 30.76 s | 12,000 | 8,638 | 3,362 | 28.02% | 0 | 30,848 | 18.56 MB |
+| Cadence Run B follow-up | Higher-frequency follow-up | 30.02 s | 12,000 | 3,753 | 8,247 | 68.73% | 0 | 34,601 | 10.59 MB |
 
-### Run B First Collection Results
+Final Phase 2 database state:
 
-| Metric | Result |
+- 6 completed controlled runs
+- 60 app-level run-summary rows
+- 34,601 raw review rows
+- 34,601 cleaned review rows
+- 75,918 quality-flag rows
+- 0 duplicate review-identity groups
+- 0 raw reviews without cleaned rows
+- 0 cleaned rows without raw reviews
+- 0 orphan quality flags
+- 0 foreign-key violations
+- final SQLite database size: 84.68 MB
+
+## Cadence analysis
+
+### Controlled run comparison
+
+| Cadence test | Mean interval | Fetched | New DB inserts | Duplicate rate | Posted between collections | Older reviews surfaced later | Median source lag | Runtime |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Run A | 17.16 h | 12,000 | 4,395 | 63.38% | 0 | 4,395 | 24.04 h | 28.14 s |
+| Run B follow-up | 14.66 h | 12,000 | 3,753 | 68.73% | 0 | 3,753 | 24.04 h | 30.02 s |
+
+The Run B first collection occurred 100.65 hours after Run A, so it is treated as a new baseline rather than a separate twice-daily outcome. It inserted 8,638 reviews, including 8,015 posted after the prior Run A boundary and 623 older reviews that surfaced later.
+
+### Timestamp finding
+
+The controlled cadence tests distinguished between:
+
+1. review identities that were new to the database
+2. reviews actually posted between the two collections
+
+Both controlled cadence runs found zero database-new reviews with timestamps proving that they were posted between the app-specific collection boundaries. All 8,148 combined new inserts from Run A and Run B follow-up were older reviews that appeared in the returned 1,200-review window later.
+
+Therefore, twice-daily collection may improve returned-window coverage for high-turnover apps, but the completed tests did not demonstrate a true posting-time freshness benefit.
+
+The approximately 24-hour returned-window lag was consistent in the two controlled tests, but it should not be interpreted as a universal Google Play rule.
+
+### App-level cadence result
+
+| App | Run A new-insert rate | Run B new-insert rate | Run A duplicate rate | Run B duplicate rate | Recommendation |
+|---|---:|---:|---:|---:|---|
+| YouTube | 99.92% | 82.83% | 0.08% | 17.17% | Twice-daily candidate for returned-window coverage |
+| TikTok | 51.83% | 33.83% | 48.17% | 66.17% | Monitor before changing cadence |
+| Spotify | 48.33% | 38.00% | 51.67% | 62.00% | Monitor before changing cadence |
+| Instagram | 99.83% | 99.67% | 0.17% | 0.33% | Twice-daily candidate for returned-window coverage |
+| Uber | 26.42% | 25.75% | 73.58% | 74.25% | Once-daily candidate |
+| DoorDash | 6.08% | 2.08% | 93.92% | 97.92% | Once-daily candidate |
+| Duolingo | 0.50% | 0.25% | 99.50% | 99.75% | Once-daily candidate |
+| Google Maps | 15.33% | 12.58% | 84.67% | 87.42% | Once-daily candidate |
+| Netflix | 10.25% | 12.67% | 89.75% | 87.33% | Once-daily candidate |
+| Reddit | 7.75% | 5.08% | 92.25% | 94.92% | Once-daily candidate |
+
+### Cadence recommendation
+
+A blanket twice-daily schedule is not supported.
+
+- Twice-daily coverage candidates: YouTube and Instagram
+- Once-daily candidates: Uber, DoorDash, Duolingo, Google Maps, Netflix, and Reddit
+- Continue monitoring before changing cadence: TikTok and Spotify
+
+YouTube and Instagram are twice-daily candidates only when returned-window coverage is more important than efficiency. No posting-time freshness benefit was demonstrated for these apps.
+
+## Ingestion monitoring layer
+
+The latest project stage adds a lightweight automated monitoring layer on top of the existing ingestion pipeline. It produces a run-level report and app-level health classifications without requiring a separate dashboard.
+
+### Signals monitored
+
+- ingestion success or failure
+- run runtime
+- total fetched records
+- new database inserts
+- duplicates skipped
+- duplicate rate
+- app-level errors
+- database row and file-size growth
+- quality-flag counts and rates
+- missing or corrupted expected outputs
+- abnormal app behavior compared with recent runs
+- database and relationship validation results
+
+### Health classification
+
+Each app and the overall run are classified as:
+
+- `healthy`: collection completed and monitored signals remain within the initial thresholds
+- `warning`: collection completed, but at least one behavior or output needs review
+- `failing`: collection failed, database loading or integrity failed, or a critical validation check did not pass
+
+### Initial threshold method
+
+The first thresholds use the three most recent prior comparable runs:
+
+1. Phase 2 Day 3 controlled repeated run
+2. Cadence Run A
+3. Run B first-collection baseline
+
+Thresholds are calculated separately for each app using the median and median absolute deviation (MAD). Practical minimum margins are included because only three comparable reference runs are currently available.
+
+| Signal | Initial warning rule |
+|---|---|
+| New inserts | Current value below `median − max(3×MAD, 50% of median, 25 records)` |
+| Duplicate rate | Current rate above `median + max(3×MAD, 0.10)` |
+| App runtime | Current runtime above `median + max(3×MAD, 1 second)` |
+| Run runtime | Current runtime above `median + max(3×MAD, 15 seconds)` |
+| Quality flags | Absolute rate change above `max(3×MAD, 0.10 flags per fetched record)` |
+
+These are transparent project-specific starting thresholds, not universal Google Play limits. They should be recalibrated after more routine production runs are collected.
+
+## Current monitoring result
+
+The monitoring layer was executed against the final Run B follow-up database.
+
+| Signal | Result |
 |---|---:|
-| Reviews fetched | 12,000 |
-| New database inserts | 8,638 |
-| Duplicates skipped | 3,362 |
-| New insert rate | 71.98% |
-| Duplicate rate | 28.02% |
-| Reviews posted after the prior Run A boundary | 8,015 |
-| Older reviews surfaced later | 623 |
-| Wall-clock runtime | 30.76 s |
-| Database row growth | 8,638 |
-| Database size growth | 18.56 MB |
-| Collection errors | 0 |
-
-### Run B First Collection Workflow
-
-The First Collection workflow included:
-
-- continuation from the Cadence Run A database
-- validation of the input database checkpoint
-- collection of 1,200 reviews for each of the same 10 apps
-- raw and cleaned review insertion
-- deterministic duplicate prevention
-- app-level ingestion summaries
-- database integrity validation
-- timestamp classification
-- pre-run and post-run database snapshots
-- creation of the checkpoint used by the Run B Follow-up Notebook
-
-### Run B First Collection Notebook
-
-[`notebooks/Google_Play_Phase2_Cadence_Test_RunB_First_Collection.ipynb`](notebooks/Google_Play_Phase2_Cadence_Test_RunB_First_Collection.ipynb)
-
-### Run B First Collection Database
-
-[`database/google_play_reviews_after_runB_first_collection.sqlite.zip`](database/google_play_reviews_after_runB_first_collection.sqlite.zip)
-
-### Complete First Collection Checkpoint
-
-This checkpoint contains the validated First Collection database and supporting output files used by the Follow-up Notebook:
-
-[`database/phase2_cadence_runB_first_collection_checkpoint_20260714_020137_utc.zip`](database/phase2_cadence_runB_first_collection_checkpoint_20260714_020137_utc.zip)
-
-### Run B First Collection Baseline Outputs
-
-- [`outputs/phase2_cadence_runB_first_collection_app_summary.csv`](outputs/phase2_cadence_runB_first_collection_app_summary.csv)
-- [`outputs/phase2_cadence_runB_first_collection_completed_run_record.csv`](outputs/phase2_cadence_runB_first_collection_completed_run_record.csv)
-- [`outputs/phase2_cadence_runB_first_collection_database_validation.csv`](outputs/phase2_cadence_runB_first_collection_database_validation.csv)
-- [`outputs/phase2_cadence_runB_first_collection_metadata.json`](outputs/phase2_cadence_runB_first_collection_metadata.json)
-- [`outputs/phase2_cadence_runB_first_collection_pre_run_app_snapshot.csv`](outputs/phase2_cadence_runB_first_collection_pre_run_app_snapshot.csv)
-- [`outputs/phase2_cadence_runB_first_collection_pre_run_snapshot.csv`](outputs/phase2_cadence_runB_first_collection_pre_run_snapshot.csv)
-- [`outputs/phase2_cadence_runB_first_collection_prior_run_history.csv`](outputs/phase2_cadence_runB_first_collection_prior_run_history.csv)
-- [`outputs/phase2_cadence_runB_first_collection_timestamp_audit.csv`](outputs/phase2_cadence_runB_first_collection_timestamp_audit.csv)
-- [`outputs/phase2_cadence_runB_first_collection_timestamp_summary.csv`](outputs/phase2_cadence_runB_first_collection_timestamp_summary.csv)
-- [`outputs/phase2_cadence_runB_first_collection_timestamp_validation.csv`](outputs/phase2_cadence_runB_first_collection_timestamp_validation.csv)
-- [`outputs/phase2_cadence_runB_first_collection_checkpoint_manifest.csv`](outputs/phase2_cadence_runB_first_collection_checkpoint_manifest.csv)
-
----
-
-## Controlled Cadence Tests
-
-Two comparable higher-frequency tests were evaluated.
-
-### Cadence Run A
-
-- Previous collection: Day 3
-- Mean app-specific interval: 17.16 hours
-- Fixed apps: 10
-- Target per app: 1,200 reviews
-
-### Cadence Run B
-
-- Previous collection: Run B First Collection
-- Mean app-specific interval: 14.66 hours
-- Fixed apps: 10
-- Target per app: 1,200 reviews
-
-The Run B cadence result is based on the change between the First Collection and the Follow-up Collection.
-
----
-
-## Run-Level Cadence Comparison
-
-| Metric | Cadence Run A | Cadence Run B |
-|---|---:|---:|
-| Mean collection interval | 17.16 h | 14.66 h |
-| Reviews fetched | 12,000 | 12,000 |
-| New database inserts | 4,395 | 3,753 |
-| Duplicates skipped | 7,605 | 8,247 |
-| New insert rate | 36.62% | 31.27% |
-| Duplicate rate | 63.38% | 68.73% |
-| Reviews posted between collections | 0 | 0 |
-| Older reviews surfaced later | 4,395 | 3,753 |
-| Posted-between rate of new inserts | 0.00% | 0.00% |
-| Median source lag | 24.04 h | 24.04 h |
-| Wall-clock runtime | 28.14 s | 30.02 s |
-| Database row growth | 4,395 | 3,753 |
-| Database size growth | 11.76 MB | 10.59 MB |
-| Collection errors | 0 | 0 |
-
-Detailed run-level comparison:
-
-[`outputs/phase2_cadence_runA_runB_run_level_comparison.csv`](outputs/phase2_cadence_runA_runB_run_level_comparison.csv)
-
-### New-Insert Timestamp Ranges
-
-| Test | Earliest New-Insert Review Timestamp | Latest New-Insert Review Timestamp |
-|---|---|---|
-| Cadence Run A | `2026-07-04T15:23:42+00:00` | `2026-07-08T21:14:19+00:00` |
-| Cadence Run B | `2026-07-13T01:56:51+00:00` | `2026-07-13T16:36:13+00:00` |
-
----
-
-## Timestamp Freshness Method
-
-A review can be new to the database without being newly posted between two collections.
-
-For each new database insert, the analysis compared:
-
-- the review timestamp
-- the preceding app-specific `fetched_at` timestamp
-- the current app-specific `fetched_at` timestamp
-
-Each inserted review was assigned to one of four categories:
-
-1. `posted_between_collections`
-2. `older_review_surfaced_later`
-3. `timestamp_after_fetch`
-4. `missing_or_unusable_timestamp`
-
-Using app-specific collection boundaries avoids treating the 10 sequential app requests as if they occurred at exactly the same time.
-
----
-
-## Timestamp Freshness Result
-
-Across Cadence Run A and Cadence Run B:
-
-| Metric | Result |
-|---|---:|
-| Total new database inserts audited | 8,148 |
-| Posted between collections | 0 |
-| Older reviews surfaced later | 8,148 |
-| Timestamp after fetch | 0 |
-| Missing or unusable timestamp | 0 |
-
-### Main Finding
-
-All 8,148 new database inserts across the two controlled cadence tests had review timestamps at or before the preceding app-specific collection boundary.
-
-The records were new to the database because they entered the returned review window later.
-
-They were not newly posted during the interval between collections.
-
-Therefore:
-
-> `new to the database` does not mean `newly posted between runs`.
-
-Detailed timestamp files:
-
-- [`outputs/phase2_cadence_runA_timestamp_audit_reconstructed.csv`](outputs/phase2_cadence_runA_timestamp_audit_reconstructed.csv)
-- [`outputs/phase2_cadence_runA_timestamp_summary_reconstructed.csv`](outputs/phase2_cadence_runA_timestamp_summary_reconstructed.csv)
-- [`outputs/phase2_cadence_runB_followup_timestamp_audit.csv`](outputs/phase2_cadence_runB_followup_timestamp_audit.csv)
-- [`outputs/phase2_cadence_runB_followup_timestamp_summary.csv`](outputs/phase2_cadence_runB_followup_timestamp_summary.csv)
-
----
-
-## Returned-Window Lag
-
-The newest returned review remained approximately 24 hours behind the collection time in both controlled cadence tests.
-
-| Test | Median Lag Between Collection Time and Newest Returned Review |
-|---|---:|
-| Cadence Run A | 24.04 h |
-| Cadence Run B | 24.04 h |
-
-Run B source-freshness diagnostics found:
-
-- all 10 returned review windows moved forward
-- median returned-window advance was 14.72 hours
-- mean collection interval was 14.66 hours
-- all 10 latest returned timestamps belonged to newly inserted reviews
-- follow-up source lag ranged from approximately 24.01 to 24.49 hours
-- all 10 apps showed at least 20 hours of source lag
-
-This supports the interpretation that the returned review window moved forward with time while remaining approximately one day behind the live collection timestamp.
-
-This approximately 24-hour lag was a consistent observation in these controlled runs. It should not be treated as a universal Google Play rule.
-
-Detailed source-freshness output:
-
-[`outputs/phase2_cadence_runB_followup_source_freshness_diagnostic.csv`](outputs/phase2_cadence_runB_followup_source_freshness_diagnostic.csv)
-
----
-
-## Cadence Run A App-Level Results
-
-| App | New DB Inserts | Duplicate Rate | App Runtime | New-Insert Timestamp Range | Posted Between |
-|---|---:|---:|---:|---|---:|
-| YouTube | 1,199 | 0.08% | 1.22 s | `2026-07-08T10:17:11+00:00` to `2026-07-08T21:13:22+00:00` | 0 |
-| TikTok | 622 | 48.17% | 0.68 s | `2026-07-08T04:08:06+00:00` to `2026-07-08T21:14:15+00:00` | 0 |
-| Spotify | 580 | 51.67% | 0.74 s | `2026-07-08T04:06:13+00:00` to `2026-07-08T21:14:19+00:00` | 0 |
-| Instagram | 1,198 | 0.17% | 1.02 s | `2026-07-08T11:26:23+00:00` to `2026-07-08T21:12:32+00:00` | 0 |
-| Uber | 317 | 73.58% | 0.98 s | `2026-07-08T04:09:18+00:00` to `2026-07-08T21:12:10+00:00` | 0 |
-| DoorDash | 73 | 93.92% | 0.57 s | `2026-07-08T04:54:25+00:00` to `2026-07-08T21:03:08+00:00` | 0 |
-| Duolingo | 6 | 99.50% | 0.78 s | `2026-07-08T04:17:19+00:00` to `2026-07-08T15:57:17+00:00` | 0 |
-| Google Maps | 184 | 84.67% | 0.65 s | `2026-07-04T15:23:42+00:00` to `2026-07-08T21:14:19+00:00` | 0 |
-| Netflix | 123 | 89.75% | 0.72 s | `2026-07-08T04:08:00+00:00` to `2026-07-08T21:01:32+00:00` | 0 |
-| Reddit | 93 | 92.25% | 0.68 s | `2026-07-08T04:15:59+00:00` to `2026-07-08T20:43:50+00:00` | 0 |
-
----
-
-## Cadence Run B App-Level Results
-
-| App | New DB Inserts | Duplicate Rate | App Runtime | New-Insert Timestamp Range | Posted Between |
-|---|---:|---:|---:|---|---:|
-| YouTube | 994 | 17.17% | 1.93 s | `2026-07-13T01:59:02+00:00` to `2026-07-13T16:35:07+00:00` | 0 |
-| TikTok | 406 | 66.17% | 0.79 s | `2026-07-13T01:59:51+00:00` to `2026-07-13T16:34:23+00:00` | 0 |
-| Spotify | 456 | 62.00% | 0.77 s | `2026-07-13T01:56:51+00:00` to `2026-07-13T16:35:05+00:00` | 0 |
-| Instagram | 1,196 | 0.33% | 0.85 s | `2026-07-13T08:02:32+00:00` to `2026-07-13T16:36:13+00:00` | 0 |
-| Uber | 309 | 74.25% | 0.78 s | `2026-07-13T02:01:50+00:00` to `2026-07-13T16:34:04+00:00` | 0 |
-| DoorDash | 25 | 97.92% | 0.93 s | `2026-07-13T01:58:41+00:00` to `2026-07-13T16:32:29+00:00` | 0 |
-| Duolingo | 3 | 99.75% | 0.97 s | `2026-07-13T08:45:54+00:00` to `2026-07-13T16:07:35+00:00` | 0 |
-| Google Maps | 151 | 87.42% | 0.84 s | `2026-07-13T02:06:35+00:00` to `2026-07-13T16:34:26+00:00` | 0 |
-| Netflix | 152 | 87.33% | 0.86 s | `2026-07-13T01:58:20+00:00` to `2026-07-13T16:31:09+00:00` | 0 |
-| Reddit | 61 | 94.92% | 0.74 s | `2026-07-13T02:03:14+00:00` to `2026-07-13T16:32:15+00:00` | 0 |
-
-Complete app-level comparison:
-
-[`outputs/phase2_cadence_runA_runB_app_level_recommendations.csv`](outputs/phase2_cadence_runA_runB_app_level_recommendations.csv)
-
----
-
-## App-Level Cadence Decision Rules
-
-The following project-specific operating rules were used for the tested 1,200-review returned window.
-
-### Twice-Daily Coverage Candidate
-
-An app is classified as a twice-daily coverage candidate when at least 80% of the returned batch is new to the database in both controlled cadence tests.
-
-### Once-Daily Candidate
-
-An app is classified as a once-daily candidate when at least 70% of the returned batch is duplicate in both controlled cadence tests.
-
-### Monitor Before Changing Cadence
-
-Apps that fall between the two patterns remain under observation.
-
-These thresholds are project-specific operating rules for this controlled experiment. They are not universal Google Play thresholds.
-
----
-
-## Final App-Level Recommendation
-
-| App | Run A New Insert Rate | Run B New Insert Rate | Timestamp Freshness Benefit | Recommendation |
-|---|---:|---:|---|---|
-| YouTube | 99.92% | 82.83% | Not demonstrated | Twice-daily candidate for returned-window coverage |
-| TikTok | 51.83% | 33.83% | Not demonstrated | Monitor before changing cadence |
-| Spotify | 48.33% | 38.00% | Not demonstrated | Monitor before changing cadence |
-| Instagram | 99.83% | 99.67% | Not demonstrated | Twice-daily candidate for returned-window coverage |
-| Uber | 26.42% | 25.75% | Not demonstrated | Once-daily candidate |
-| DoorDash | 6.08% | 2.08% | Not demonstrated | Once-daily candidate |
-| Duolingo | 0.50% | 0.25% | Not demonstrated | Once-daily candidate |
-| Google Maps | 15.33% | 12.58% | Not demonstrated | Once-daily candidate |
-| Netflix | 10.25% | 12.67% | Not demonstrated | Once-daily candidate |
-| Reddit | 7.75% | 5.08% | Not demonstrated | Once-daily candidate |
-
----
-
-## Twice-Daily Coverage Candidates
-
-### YouTube
-
-- Run A new insert rate: 99.92%
-- Run B new insert rate: 82.83%
-- Run A duplicate rate: 0.08%
-- Run B duplicate rate: 17.17%
-- Timestamp-verified reviews posted between collections: 0 in both tests
-
-YouTube showed high returned-window turnover in both cadence tests.
-
-The fixed 1,200-review returned batch was close to saturation, creating a possible coverage risk under a longer collection interval.
-
-### Instagram
-
-- Run A new insert rate: 99.83%
-- Run B new insert rate: 99.67%
-- Run A duplicate rate: 0.17%
-- Run B duplicate rate: 0.33%
-- Timestamp-verified reviews posted between collections: 0 in both tests
-
-Instagram showed almost complete returned-window replacement in both cadence tests.
-
-This creates the strongest returned-window coverage case for a possible twice-daily exception.
-
-### Important Limitation
-
-YouTube and Instagram are twice-daily candidates only for returned-window coverage.
-
-No posting-time freshness benefit was demonstrated for either app.
-
----
-
-## Once-Daily Candidates
-
-The following apps were at least 70% duplicate in both controlled cadence tests:
-
-- Uber
-- DoorDash
-- Duolingo
-- Google Maps
-- Netflix
-- Reddit
-
-These apps also produced zero timestamp-verified reviews posted between collections.
-
-Under the current 1,200-review setup, the results support keeping these apps on once-daily collection.
-
----
-
-## Monitor Before Changing Cadence
-
-The following apps showed moderate returned-window turnover:
-
-- TikTok
-- Spotify
-
-Their current results do not support a clear app-specific twice-daily exception.
-
-Additional controlled observations would be needed before changing their cadence.
-
----
-
-## Overall Cadence Recommendation
-
-A blanket twice-daily schedule is not supported for all 10 apps.
-
-The controlled results support:
-
-- once-daily collection as the default
-- possible twice-daily exceptions for YouTube and Instagram when returned-window coverage is important
-- continued monitoring for TikTok and Spotify
-- once-daily collection for Uber, DoorDash, Duolingo, Google Maps, Netflix, and Reddit
-
-The recommendation separates two different operational questions:
-
-1. **Posting-time freshness:** whether the collection captures reviews posted between two runs
-2. **Returned-window coverage:** whether a fixed 1,200-review returned window changes quickly enough to create a missed-coverage risk
-
-No posting-time freshness benefit was demonstrated.
-
-YouTube and Instagram still showed a possible returned-window coverage benefit.
-
----
-
-## Runtime Measurement
-
-Run-level runtime and app-level runtime use different definitions.
-
-### Run-Level Runtime
-
-Run-level runtime is the wall-clock collection time and includes the fixed delay between app requests.
-
-### App-Level Runtime
-
-App-level runtime is the processing time recorded for the individual app request.
-
-The Run B runtime records were normalized so that the database run-level `runtime_seconds` field uses wall-clock collection runtime.
-
-| Run | Processing Runtime | Wall-Clock Runtime | Database Runtime |
-|---|---:|---:|---:|
-| Run B First Collection | 10.09 s | 30.76 s | 30.76 s |
-| Run B Follow-up | 9.46 s | 30.02 s | 30.02 s |
-
-Runtime output:
-
-[`outputs/phase2_cadence_runB_followup_runtime_metrics.csv`](outputs/phase2_cadence_runB_followup_runtime_metrics.csv)
-
----
-
-## Data Validation
-
-The final workflow validates:
-
-- fixed app count
-- fixed review target
-- run-level totals
-- app-level totals
-- new insert plus duplicate reconciliation
-- raw and cleaned one-to-one relationships
-- database row growth
-- duplicate review identities
-- missing review IDs
-- orphan raw records
-- orphan cleaned records
-- orphan quality flags
-- app-specific collection boundaries
-- timestamp classification totals
-- source freshness
-- runtime consistency
-- SQLite foreign keys
-- SQLite integrity
-- final database row counts
-- completed run count
-- app-summary row count
-- exported file sizes
-- exported SHA-256 values
-- final report completeness
-- final ZIP contents
-
-The final package validations completed without failures.
-
-### Key Validation Files
-
-- [`outputs/phase2_cadence_runA_runB_comparison_validation.csv`](outputs/phase2_cadence_runA_runB_comparison_validation.csv)
-- [`outputs/phase2_cadence_runA_runB_final_report_validation.csv`](outputs/phase2_cadence_runA_runB_final_report_validation.csv)
-- [`outputs/phase2_cadence_runA_timestamp_validation.csv`](outputs/phase2_cadence_runA_timestamp_validation.csv)
-- [`outputs/phase2_cadence_runB_first_collection_database_validation.csv`](outputs/phase2_cadence_runB_first_collection_database_validation.csv)
-- [`outputs/phase2_cadence_runB_first_collection_timestamp_validation.csv`](outputs/phase2_cadence_runB_first_collection_timestamp_validation.csv)
-- [`outputs/phase2_cadence_runB_followup_database_validation.csv`](outputs/phase2_cadence_runB_followup_database_validation.csv)
-- [`outputs/phase2_cadence_runB_followup_final_database_validation.csv`](outputs/phase2_cadence_runB_followup_final_database_validation.csv)
-- [`outputs/phase2_cadence_runB_followup_timestamp_validation.csv`](outputs/phase2_cadence_runB_followup_timestamp_validation.csv)
-- [`outputs/phase2_cadence_runB_followup_source_freshness_validation.csv`](outputs/phase2_cadence_runB_followup_source_freshness_validation.csv)
-- [`outputs/phase2_cadence_runB_followup_runtime_validation.csv`](outputs/phase2_cadence_runB_followup_runtime_validation.csv)
-- [`outputs/final_package_manifest.csv`](outputs/final_package_manifest.csv)
-
----
-
-## Final Package Validation
-
-The completed final package contains:
-
-- final database
-- final report
-- run-level comparison
-- app-level recommendations
-- Run A timestamp reconstruction
-- Run B First Collection baseline records
-- Run B Follow-up timestamp audit
-- source-freshness diagnostic
-- runtime metrics
-- metadata
-- complete run history
-- validation outputs
-- SHA-256 manifest
-
-The final report completeness validation confirms that the report includes:
-
-- controlled setup
-- Run B First Collection baseline
-- run-level comparison
-- Run A app-level results
-- Run B app-level results
-- app-level runtime
-- timestamp ranges
-- database growth notes
-- all 10 apps
-- final recommendations
-- measurement notes
-
----
-
-## Key Repository Files
-
-### Run B First Collection Notebook
-
-[`notebooks/Google_Play_Phase2_Cadence_Test_RunB_First_Collection.ipynb`](notebooks/Google_Play_Phase2_Cadence_Test_RunB_First_Collection.ipynb)
-
-This notebook established the validated Run B baseline and generated the checkpoint used by the follow-up collection.
-
-### Run B Follow-up Notebook
-
-[`notebooks/Google_Play_Phase2_Cadence_Test_RunB_Followup_Collection.ipynb`](notebooks/Google_Play_Phase2_Cadence_Test_RunB_Followup_Collection.ipynb)
-
-The latest notebook includes:
-
-- checkpoint upload and validation
-- database continuation
-- follow-up run creation
-- controlled review collection
-- app-level ingestion metrics
-- post-run database validation
-- app-specific timestamp audit
-- source-freshness diagnostics
-- runtime normalization
-- Cadence Run A timestamp reconstruction
-- Run A versus Run B comparison
-- app-level recommendations
-- final report generation
-- final package generation
-- manifest validation
-
-### Cadence Run A Notebook
-
-[`notebooks/Google_Play_Phase2_Cadence_Test_RunA.ipynb`](notebooks/Google_Play_Phase2_Cadence_Test_RunA.ipynb)
-
-### Final Report
-
-[`reports/phase2_cadence_runA_runB_final_report.md`](reports/phase2_cadence_runA_runB_final_report.md)
-
-### Run B Database Checkpoints
-
-Run B First Collection database:
-
-[`database/google_play_reviews_after_runB_first_collection.sqlite.zip`](database/google_play_reviews_after_runB_first_collection.sqlite.zip)
-
-Complete First Collection checkpoint used by the Follow-up Notebook:
-
-[`database/phase2_cadence_runB_first_collection_checkpoint_20260714_020137_utc.zip`](database/phase2_cadence_runB_first_collection_checkpoint_20260714_020137_utc.zip)
-
-Final database after the Run B Follow-up Collection:
-
-[`database/google_play_reviews_after_runB_followup.sqlite.zip`](database/google_play_reviews_after_runB_followup.sqlite.zip)
-
-### Main Final Outputs
-
-- [`outputs/phase2_cadence_runA_runB_run_level_comparison.csv`](outputs/phase2_cadence_runA_runB_run_level_comparison.csv)
-- [`outputs/phase2_cadence_runA_runB_app_level_recommendations.csv`](outputs/phase2_cadence_runA_runB_app_level_recommendations.csv)
-- [`outputs/phase2_cadence_runB_followup_app_summary.csv`](outputs/phase2_cadence_runB_followup_app_summary.csv)
-- [`outputs/phase2_cadence_runB_followup_timestamp_audit.csv`](outputs/phase2_cadence_runB_followup_timestamp_audit.csv)
-- [`outputs/phase2_cadence_runB_followup_timestamp_summary.csv`](outputs/phase2_cadence_runB_followup_timestamp_summary.csv)
-- [`outputs/phase2_cadence_runB_followup_source_freshness_diagnostic.csv`](outputs/phase2_cadence_runB_followup_source_freshness_diagnostic.csv)
-- [`outputs/phase2_cadence_runB_followup_runtime_metrics.csv`](outputs/phase2_cadence_runB_followup_runtime_metrics.csv)
-- [`outputs/phase2_cadence_runB_followup_metadata.json`](outputs/phase2_cadence_runB_followup_metadata.json)
-- [`outputs/phase2_complete_run_history.csv`](outputs/phase2_complete_run_history.csv)
-- [`outputs/final_package_manifest.csv`](outputs/final_package_manifest.csv)
-
----
-
-## Repository Structure
+| Ingestion status | `completed` |
+| Monitoring status | `warning` |
+| Runtime | 30.02 seconds |
+| Total fetched | 12,000 |
+| New inserts | 3,753 |
+| Duplicates skipped | 8,247 |
+| Duplicate rate | 68.73% |
+| App-level errors | 0 |
+| Database row growth | 3,753 |
+| Database file growth | 10.59 MB |
+| Quality flags | 12,600 |
+| Healthy / warning / failing apps | 8 / 2 / 0 |
+| Validation checks | 22 passed, 0 failed |
+
+TikTok and YouTube are classified as `warning` because their duplicate rates are above their own initial history-based thresholds:
+
+| App | Current duplicate rate | Initial warning threshold | Monitoring status |
+|---|---:|---:|---|
+| TikTok | 66.17% | 57.00% | `warning` |
+| YouTube | 17.17% | 10.08% | `warning` |
+
+This warning does not mean that ingestion failed. The run completed, all 12,000 expected records were fetched, there were no app-level errors, and all 22 validation checks passed.
+
+The monitoring result also does not change the cadence conclusion. YouTube still returned 994 new database inserts out of 1,200 fetched reviews and remains a possible twice-daily exception when returned-window coverage is prioritized. The warning only indicates a behavior change that should be reviewed over future runs.
+
+## Monitoring outputs
+
+The monitoring notebook generates:
+
+- `outputs/monitoring_run_summary.csv`
+- `outputs/monitoring_app_health.csv`
+- `outputs/monitoring_app_thresholds.csv`
+- `outputs/monitoring_rule_definitions.csv`
+- `outputs/monitoring_validation_checks.csv`
+- `outputs/monitoring_alerts.csv`
+- `outputs/monitoring_source_manifest_validation.csv`
+- `outputs/monitoring_output_manifest.csv`
+- `outputs/monitoring_metadata.json`
+- `reports/google_play_ingestion_monitoring_report.md`
+- `reports/monitoring_design_and_thresholds.md`
+
+The monitoring notebook is:
+
+- `notebooks/Google_Play_Ingestion_Monitoring_Layer.ipynb`
+
+## Repository structure
 
 ```text
 app-review-source-validation/
-├── data/
-│   └── source-validation and sample data files
-├── database/
-│   ├── google_play_reviews.sqlite
-│   ├── google_play_reviews.sqlite.zip
-│   ├── google_play_reviews_after_day3.sqlite.zip
-│   ├── google_play_reviews_after_cadence_runA.sqlite.zip
-│   ├── google_play_reviews_after_runB_first_collection.sqlite.zip
-│   ├── phase2_cadence_runB_first_collection_checkpoint_20260714_020137_utc.zip
-│   └── google_play_reviews_after_runB_followup.sqlite.zip
-├── database_design/
-│   └── SQLite schema and database design files
-├── notebooks/
-│   ├── Phase 1 source-validation notebooks
-│   ├── Phase 2 Day 1 notebook
-│   ├── Phase 2 Day 2 notebook
-│   ├── Phase 2 Day 3 notebook
-│   ├── Google_Play_Phase2_Cadence_Test_RunA.ipynb
-│   ├── Google_Play_Phase2_Cadence_Test_RunB_First_Collection.ipynb
-│   └── Google_Play_Phase2_Cadence_Test_RunB_Followup_Collection.ipynb
-├── outputs/
-│   ├── Phase 1 validation outputs
-│   ├── Phase 2 repeated-run outputs
-│   ├── Run A cadence outputs
-│   ├── Run B First Collection baseline outputs
-│   ├── Run B Follow-up outputs
-│   ├── timestamp audits
-│   ├── source-freshness diagnostics
-│   ├── runtime metrics
-│   ├── validation files
-│   ├── phase2_complete_run_history.csv
-│   └── final_package_manifest.csv
-├── reports/
-│   ├── earlier run findings
-│   └── phase2_cadence_runA_runB_final_report.md
-├── .gitignore
 ├── README.md
-└── requirements.txt
+├── requirements.txt
+├── data/
+├── database/
+├── database_design/
+│   ├── google_play_review_schema.md
+│   └── schema.sql
+├── notebooks/
+│   └── Google_Play_Ingestion_Monitoring_Layer.ipynb
+├── outputs/
+│   ├── monitoring_run_summary.csv
+│   ├── monitoring_app_health.csv
+│   ├── monitoring_app_thresholds.csv
+│   ├── monitoring_rule_definitions.csv
+│   ├── monitoring_validation_checks.csv
+│   ├── monitoring_alerts.csv
+│   ├── monitoring_source_manifest_validation.csv
+│   ├── monitoring_output_manifest.csv
+│   └── monitoring_metadata.json
+└── reports/
+    ├── phase2_cadence_runA_runB_final_report.md
+    ├── google_play_ingestion_monitoring_report.md
+    └── monitoring_design_and_thresholds.md
 ```
 
----
+## How to reproduce the monitoring report
 
-## Run B Reproduction Order
+1. Open `notebooks/Google_Play_Ingestion_Monitoring_Layer.ipynb` in Google Colab.
+2. Run all cells in order.
+3. When prompted, upload the final Phase 2 Run B complete-report ZIP package.
+4. The notebook validates the package and database.
+5. It automatically identifies the latest completed run.
+6. It builds app-specific thresholds from the three prior comparable runs.
+7. It generates the run summary, app-health classifications, alerts, validation outputs, metadata, and Markdown monitoring report.
 
-The completed Run B workflow should be read in this order:
+The monitoring notebook does not perform another cadence collection. It evaluates the completed Phase 2 evidence and can be reused after future ingestion runs.
 
-1. Open `Google_Play_Phase2_Cadence_Test_RunB_First_Collection.ipynb`.
-2. Review the First Collection baseline outputs.
-3. Use `phase2_cadence_runB_first_collection_checkpoint_20260714_020137_utc.zip` as the validated checkpoint.
-4. Open `Google_Play_Phase2_Cadence_Test_RunB_Followup_Collection.ipynb`.
-5. Review the timestamp and source-freshness analysis.
-6. Review the Run A versus Run B comparison.
-7. Review the final app-level cadence recommendation.
+## Key conclusions
 
-Workflow:
+1. Google Play is the primary source for the recurring review-ingestion pilot.
+2. The SQLite ingestion design successfully preserves raw reviews, cleaned text, run history, deduplication, and quality flags.
+3. Six controlled Phase 2 runs completed with no app-level collection errors and no database relationship failures.
+4. A blanket twice-daily schedule is not supported.
+5. Once-daily collection should remain the default.
+6. YouTube and Instagram may use twice-daily collection only when returned-window coverage is more important than efficiency.
+7. The cadence tests did not demonstrate a true posting-time freshness benefit.
+8. The monitoring layer now provides automated `healthy`, `warning`, and `failing` classifications for each run.
+9. The current monitoring warning is a review signal caused by app-level duplicate-rate changes, not a pipeline failure.
 
-```text
-Cadence Run A database
-        ↓
-Run B First Collection Notebook
-        ↓
-First Collection database and baseline outputs
-        ↓
-Validated First Collection checkpoint
-        ↓
-Run B Follow-up Notebook
-        ↓
-Final database and timestamp audit
-        ↓
-Run A versus Run B comparison
-        ↓
-Final cadence recommendation
-```
+## Limitations
 
----
+- Results apply to the tested apps, English/United States configuration, collection dates, and fixed 1,200-review returned window.
+- Public scraper behavior and Google Play response behavior may change over time.
+- New database inserts are not automatically newly posted reviews.
+- A fixed newest-review window may turn over quickly for high-activity apps.
+- App-version and developer-reply fields are naturally missing for many reviews.
+- SQLite file-size growth is reported at run level and cannot be assigned reliably to individual apps.
+- The first monitoring thresholds use only three comparable reference runs and should be recalibrated as more operating history becomes available.
 
-## Running the Notebooks
+## Recommended next operating step
 
-Install the required Python packages:
-
-```bash
-pip install -r requirements.txt
-```
-
-The notebooks were developed and executed in Google Colab.
-
-For a new controlled collection:
-
-1. Open the required notebook in Google Colab.
-2. Run the dependency and configuration cells.
-3. Upload the database checkpoint requested by the notebook.
-4. Validate the checkpoint before collection.
-5. Confirm the fixed app list and 1,200-review target.
-6. Create the run-level database record.
-7. Run the collection cell only once.
-8. Complete the database validation.
-9. Complete the timestamp audit.
-10. Complete the source-freshness analysis.
-11. Export the database, CSV files, metadata, report, and manifest.
-12. Verify every validation check before publishing results.
-
-The First Collection Notebook records how the Run B baseline checkpoint was created.
-
-The Follow-up Notebook records the exact checkpoint and controlled configuration used for the completed Run B cadence test.
-
----
-
-## Measurement Notes
-
-- Run-level runtime is wall-clock collection time and includes the fixed delay between app requests.
-- App-level runtime is the processing time recorded for each app request.
-- New database inserts represent review identities that were not previously stored.
-- New database inserts are not automatically treated as newly posted reviews.
-- Posting-time freshness is determined from review timestamps and app-specific collection boundaries.
-- The returned review window can move forward even when the newest returned review remains behind the live collection timestamp.
-- Database size growth is reported only at run level because SQLite file-page growth cannot be reliably assigned to individual apps.
-- The approximately 24-hour returned-window lag is an observed result from the controlled tests, not a universal Google Play rule.
-- The cadence recommendations apply to the tested apps, source settings, 1,200-review returned window, and recorded collection periods.
-- The First Collection was used as the Run B baseline because its interval from Cadence Run A was substantially longer than the controlled follow-up interval.
-- The Run B cadence result is based on the interval between the First Collection and the Follow-up Collection.
-
----
-
-## Final Conclusion
-
-The ingestion pipeline successfully completed six persistent Phase 2 runs without creating duplicate review identities or breaking database relationships.
-
-Repeated collection is technically feasible, but the results do not support using the same cadence for every app.
-
-The two controlled higher-frequency tests found:
-
-- 8,148 new database inserts
-- 0 reviews timestamp-verified as posted between collections
-- 8,148 older reviews that surfaced later
-- approximately 24.04 hours of median returned-window lag in both tests
-- zero collection errors
-- zero duplicate review identities
-- zero broken raw-to-cleaned relationships
-
-YouTube and Instagram showed consistently high returned-window turnover. Their fixed 1,200-review returned windows may create a coverage risk under a longer collection interval.
-
-Uber, DoorDash, Duolingo, Google Maps, Netflix, and Reddit remained duplicate-heavy in both cadence tests.
-
-TikTok and Spotify showed moderate turnover and require additional observation.
-
-The final operating recommendation is:
-
-- use once-daily collection as the default
-- consider twice-daily collection for YouTube and Instagram when returned-window coverage is important
-- continue monitoring TikTok and Spotify
-- retain once-daily collection for Uber, DoorDash, Duolingo, Google Maps, Netflix, and Reddit
-
-This recommendation separates posting-time freshness from returned-window coverage and is based on the validated database, First Collection baseline, Follow-up Collection results, timestamp audits, source-freshness diagnostics, and app-level cadence comparison stored in this repository.
+Continue with once-daily collection as the default and run the monitoring layer after each ingestion. Review warnings before changing app-specific schedules. After enough routine history is available, recalculate the initial thresholds using a larger baseline and evaluate whether YouTube or Instagram requires a permanent twice-daily coverage exception.
