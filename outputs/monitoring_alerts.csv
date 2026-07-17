@@ -1,0 +1,4 @@
+run_id,app_name,app_id,health_status,status_reason
+phase2_cadence_runB_followup_collection_20260714_163017,ALL APPS,run_level,warning,"app warnings: TikTok, YouTube"
+phase2_cadence_runB_followup_collection_20260714_163017,TikTok,com.zhiliaoapp.musically,warning,unusually high duplicate rate
+phase2_cadence_runB_followup_collection_20260714_163017,YouTube,com.google.android.youtube,warning,unusually high duplicate rate

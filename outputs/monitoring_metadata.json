@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-07-17T03:56:39.396231+00:00",
+  "monitored_run_id": "phase2_cadence_runB_followup_collection_20260714_163017",
+  "health_status": "warning",
+  "status_reasons": [
+    "app warnings: TikTok, YouTube"
+  ],
+  "source_package": "phase2_cadence_runB_followup_github_upload_files_complete_report_20260714_170311_utc.zip",
+  "source_package_sha256": "0baafebdc1afbecfec32036c4b4f4154a7ec6254cbbf38621ad5eeeb4764a205",
+  "database_file": "google_play_reviews_after_runB_followup.sqlite",
+  "database_sha256": "a26f6db1b16b35d7763fb8f6e9ce4048ecd3b947749811cc5c34c3d099f3cd69",
+  "reference_run_ids": [
+    "phase2_day3_controlled_repeated_run_20260709_040118",
+    "phase2_cadence_runA_twice_daily_test_20260709_210858",
+    "phase2_cadence_runB_first_collection_20260714_014620"
+  ],
+  "reference_run_count": 3,
+  "threshold_method": "median and median absolute deviation with practical minimum margins",
+  "expected_app_count": 10,
+  "expected_target_per_app": 1200
+}

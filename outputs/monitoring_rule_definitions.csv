@@ -1,0 +1,6 @@
+signal,warning_rule,failing_rule,reference
+new inserts,"current < median - max(3*MAD, 50% of median, 25)",none by itself; collection failure is evaluated separately,three most recent prior comparable runs per app
+duplicate rate,"current > median + max(3*MAD, 0.10)",none by itself,three most recent prior comparable runs per app
+runtime,"app > median + max(3*MAD, 1 sec); run > median + max(3*MAD, 15 sec)",none by itself,three most recent prior comparable runs
+quality flags,"absolute rate change > max(3*MAD, 0.10 flags/fetched record)",failed database quality validation,three most recent prior comparable runs per app
+collection and database validation,"partial fetch, missing non-database output, or negative DB file growth","collection error, database load/integrity failure, or failed critical validation",fixed pipeline invariants
