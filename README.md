@@ -20,6 +20,7 @@ The following stages are complete:
 6. Phase 2 controlled 10-app scale testing
 7. Run A and Run B cadence analysis
 8. Automated ingestion monitoring layer
+9. Monitoring threshold calibration and operational response documentation
 
 The current operating recommendation is:
 
@@ -29,7 +30,60 @@ The current operating recommendation is:
 - keep duplicate-heavy apps on once-daily collection
 - use the automated monitoring report to review each new run
 
-Additional cadence testing is not currently required. The next operational focus is monitoring and gradual threshold recalibration as more routine runs become available.
+Additional cadence testing is not currently required. Threshold calibration and operational response documentation are now complete. The current thresholds remain initial, not final production rules, and should be recalculated as more routine comparable runs become available.
+
+
+## Monitoring threshold calibration and operational response
+
+The monitoring logic now separates three condition classes:
+
+- **Hard failure:** failed collection, database loading/integrity failure, failed critical validation, or missing/corrupt required output. Result: `failing`.
+- **Warning:** the run completed and remains usable, but a behavior or non-critical signal needs review. Result: `warning`.
+- **Informational:** normal or expected behavior that is recorded but does not require intervention. Result remains `healthy`.
+
+Operational response:
+
+| Status | Required action |
+|---|---|
+| `healthy` | Record the run and continue the normal schedule; no immediate intervention. |
+| `warning` | Inspect the named app and signal, compare with the next scheduled run, and document whether it persists. |
+| `failing` | Stop downstream use, preserve logs/artifacts, correct the cause, rerun, and confirm all critical validations pass. |
+
+Threshold calibration used rolling historical replay on three completed runs and 10 controlled synthetic scenarios. Synthetic scenarios are explicitly labeled and were used only for failure conditions not present in the real run history.
+
+| Profile | Completed runs warning | App warnings | Assessment |
+|---|---:|---:|---|
+| Sensitive | 3 of 3 | 7 of 30 | Too sensitive for the current small baseline |
+| Initial | 1 of 3 | 2 of 30 | Reasonable as an initial, non-production profile |
+| Loose | 0 of 3 | 0 of 30 | Too loose; suppresses the useful TikTok and YouTube signals |
+
+The current median + MAD profile is retained. It reproduces the Run B follow-up warning for TikTok and YouTube while leaving Cadence Run A and Run B first collection healthy. The baseline is still only three prior runs, so the thresholds remain explicitly documented as initial rather than final production rules.
+
+New calibration files:
+
+```text
+notebooks/
+└── Google_Play_Monitoring_Threshold_Calibration.ipynb
+
+outputs/
+├── monitoring_calibration_metadata.json
+├── monitoring_calibration_output_manifest.csv
+├── monitoring_calibration_recommendation.csv
+├── monitoring_calibration_source_validation.csv
+├── monitoring_completed_run_app_backtest.csv
+├── monitoring_completed_run_backtest.csv
+├── monitoring_controlled_scenario_results.csv
+├── monitoring_operational_response_guide.csv
+├── monitoring_severity_matrix.csv
+├── monitoring_threshold_profiles.csv
+└── monitoring_threshold_sensitivity_summary.csv
+
+reports/
+├── monitoring_operations_guide.md
+└── monitoring_threshold_calibration_report.md
+```
+
+The calibration notebook does not collect new reviews. It reads the completed Phase 2 package, validates required source artifacts, replays prior runs without look-ahead, tests controlled conditions, and verifies every exported deliverable.
 
 ## Test applications
 
