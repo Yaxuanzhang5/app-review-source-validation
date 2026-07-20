@@ -1,0 +1,2 @@
+selected_profile,decision,assessment,evidence,baseline_limit,next_review
+initial,retain without promoting to final production rules,reasonable as an initial profile,1 of 3 completed replays warning; 2 of 30 app evaluations warning; all 10 controlled scenarios classified as expected,only three prior runs are used at each evaluation and the earliest replay includes the Day 1 cold-start baseline,recalculate after additional routine fixed-scope runs and check whether the same signals persist before changing margins

@@ -1,0 +1,4 @@
+status,meaning,immediate_action,follow_up
+healthy,No hard failure or warning condition,Record the run and continue the normal schedule.,Review in the routine report; no immediate intervention.
+warning,"Run completed and critical checks passed, but at least one behavior or non-critical signal crossed its threshold",Inspect the named app and signal; compare with the next scheduled run.,"Escalate if the warning repeats, spreads across apps, or is joined by a validation problem."
+failing,"Collection, database, required-output, or critical-validation failure","Stop downstream use, preserve logs/artifacts, correct the cause, rerun, and revalidate.",Do not treat the run as usable until all critical checks pass.

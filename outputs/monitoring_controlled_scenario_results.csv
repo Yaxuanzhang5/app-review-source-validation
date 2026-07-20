@@ -1,0 +1,11 @@
+scenario_type,scenario_name,expected_status,observed_status,status_reason,passed
+controlled_synthetic,nominal_completed_run,healthy,healthy,metrics within initial thresholds,True
+controlled_synthetic,informational_duplicate_handling,healthy,healthy,duplicates skipped and totals reconcile,True
+controlled_synthetic,high_duplicate_rate,warning,warning,duplicate rate above threshold,True
+controlled_synthetic,partial_fetch_without_error,warning,warning,partial fetched output,True
+controlled_synthetic,quality_flag_movement,warning,warning,quality-flag rate movement above threshold,True
+controlled_synthetic,app_collection_error,failing,failing,app collection error,True
+controlled_synthetic,database_load_error,failing,failing,database load error,True
+controlled_synthetic,critical_validation_failure,failing,failing,critical validation failed,True
+controlled_synthetic,missing_required_run_output,failing,failing,required core run output missing,True
+controlled_synthetic,hard_failure_plus_warning,failing,failing,database integrity failure; high duplicate rate,True

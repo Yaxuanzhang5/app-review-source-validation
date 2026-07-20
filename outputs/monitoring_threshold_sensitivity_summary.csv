@@ -1,0 +1,4 @@
+profile,completed_runs_tested,healthy_runs,warning_runs,failing_runs,app_evaluations,app_warnings,app_warning_rate,interpretation
+sensitive,3,0,3,0,30,7,0.23333333333333334,too sensitive for the current small baseline
+initial,3,2,1,0,30,2,0.06666666666666667,"reasonable as an initial, non-production profile"
+loose,3,3,0,0,30,0,0.0,too loose; it suppresses the known Run B follow-up signals

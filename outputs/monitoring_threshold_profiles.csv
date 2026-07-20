@@ -1,0 +1,4 @@
+profile,mad_multiplier,new_fraction_margin,app_new_floor,duplicate_margin,app_runtime_margin,run_runtime_margin,quality_rate_margin,run_new_floor,run_quality_fraction,purpose
+sensitive,2.0,0.25,10.0,0.05,0.5,7.5,0.05,125.0,0.05,comparison only
+initial,3.0,0.5,25.0,0.1,1.0,15.0,0.1,250.0,0.1,current provisional operating profile
+loose,4.0,0.75,50.0,0.2,2.0,30.0,0.2,500.0,0.2,comparison only

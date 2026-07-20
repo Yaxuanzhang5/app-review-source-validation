@@ -1,0 +1,15 @@
+signal_group,condition,condition_class,resulting_status,operator_response
+collection,ingestion did not complete,hard_failure,failing,stop downstream use and rerun after correction
+collection,app collection error or zero records,hard_failure,failing,inspect app error and rerun after correction
+database,"database missing, corrupt, or unloadable",hard_failure,failing,restore the last valid database and rerun
+validation,critical reconciliation or integrity check failed,hard_failure,failing,quarantine outputs and investigate before rerun
+outputs,required core run or monitoring output missing/corrupt,hard_failure,failing,regenerate and verify all required outputs
+collection,partial fetch without an explicit collection error,warning,warning,review the affected app and compare the next run
+behavior,new inserts below app-specific threshold,warning,warning,review app history; no immediate pipeline stop
+behavior,duplicate rate above app-specific threshold,warning,warning,review returned-window behavior and next run
+behavior,runtime above app- or run-specific threshold,warning,warning,check scraper response time and persistence
+quality,quality-flag rate movement above threshold,warning,warning,inspect changed flag categories and source fields
+supporting output,non-core diagnostic output missing/corrupt,warning,warning,regenerate the diagnostic artifact
+normal behavior,metrics remain within current initial thresholds,informational,healthy,record the run; no intervention
+duplicate handling,duplicates skipped and totals reconcile,informational,healthy,record as expected deduplication behavior
+baseline,only three prior comparable runs are available,informational,healthy,keep thresholds labeled initial
