@@ -1,0 +1,11 @@
+feature_or_group,assessment,reliability,coverage_share,reason
+app and review identifiers,most useful,high,1.0,Complete and validated; support stable joins and grouping.
+score and rating_group,most useful,high,1.0,Complete source rating plus a deterministic band for EDA.
+review and collection timestamps,most useful,high,1.0,Complete and parseable; useful for cohorts and source-lag analysis.
+review length features,most useful,high,1.0,Deterministic and directly useful for text-quality EDA.
+has_developer_reply,useful with caution,high for presence,1.0,"Reliable presence flag, but highly uneven across apps and not a reply-quality measure."
+duplicate_identity_flag,useful validation / low analytic variance,high,1.0,All zeros in the validated deduplicated database; useful as a guard rather than a predictive feature.
+repeated_text_flag,useful with caution,medium,1.0,"Shows repeated content, but repeated text is not the same as duplicate review identity."
+short_review_flag and low_signal_flag,useful with caution,medium,1.0,"Transparent thresholds support screening, but short text can still be meaningful."
+language_group and non_english_flag,least reliable,low-medium,0.596457,Conservative rule leaves short or unclear text undetermined; should be replaced by a validated language detector later.
+keyword issue indicators,least reliable,low-medium,1.0,"Useful for initial screening only; context, negation, spelling, and non-English wording can cause misses or false matches."
