@@ -1,0 +1,17 @@
+check,status,passed,observed
+all_reviews_have_weak_label,passed,True,0
+all_three_labels_present,passed,True,"['negative', 'neutral', 'positive']"
+modeling_ready_row_count_matches_input,passed,True,34601
+modeling_ready_review_keys_unique,passed,True,0
+score_excluded_from_modeling_ready,passed,True,False
+rating_group_excluded_from_modeling_ready,passed,True,False
+low_rating_flag_excluded_from_modeling_ready,passed,True,False
+train_test_review_key_overlap_zero,passed,True,0
+train_test_text_group_overlap_zero,passed,True,0
+all_labels_present_in_train,passed,True,"['negative', 'neutral', 'positive']"
+all_labels_present_in_test,passed,True,"['negative', 'neutral', 'positive']"
+prediction_count_matches_test_rows,passed,True,6920
+confusion_matrix_total_matches_test_rows,passed,True,6920
+model_metrics_are_finite,passed,True,finite
+rating_mentions_redacted_without_row_loss,passed,True,415
+duplicate_identity_flags_remain_zero,passed,True,0

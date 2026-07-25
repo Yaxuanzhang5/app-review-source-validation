@@ -1,0 +1,121 @@
+class,direction,rank,feature,coefficient
+negative,supports_class,1,text__horrible,2.970245473115704
+negative,supports_class,2,text__worst,2.541553668147447
+negative,supports_class,3,text__garbage,2.518462807173441
+negative,supports_class,4,text__ruined,2.3705714317032713
+negative,supports_class,5,text__trash,2.1627671881810406
+negative,supports_class,6,text__stupid,2.130774177991223
+negative,supports_class,7,text__suddenly,2.108411699993091
+negative,supports_class,8,text__forcing,2.084942165538158
+negative,supports_class,9,text__greedy,2.0505688381050216
+negative,supports_class,10,text__disgusting,2.0466281073089663
+negative,supports_class,11,text__wrost,2.0429924389829055
+negative,supports_class,12,text__scam,2.039397723657858
+negative,supports_class,13,text__why do,1.9795865869241596
+negative,supports_class,14,text__uninstall,1.9532768075683649
+negative,supports_class,15,text__worse,1.9447359580973804
+negative,supports_class,16,text__sidebar,1.9174843263685
+negative,supports_class,17,text__took,1.8612402255616127
+negative,supports_class,18,text__confusing,1.8412727258313657
+negative,supports_class,19,text__paying,1.8383739031462452
+negative,supports_class,20,text__really bad,1.8372314366776623
+negative,opposes_class,1,text__easy,-2.1152537454494795
+negative,opposes_class,2,text__but,-1.9658241721790908
+negative,opposes_class,3,text__account my,-1.8110950138750221
+negative,opposes_class,4,text__your account,-1.8081698058499958
+negative,opposes_class,5,text__no ads,-1.8078615767313402
+negative,opposes_class,6,text__they should,-1.7967873627863862
+negative,opposes_class,7,text__hai to,-1.7542903714229177
+negative,opposes_class,8,text__information,-1.7535218588379111
+negative,opposes_class,9,text__pretty good,-1.7421301484528147
+negative,opposes_class,10,text__wish,-1.7135592272502782
+negative,opposes_class,11,text__or it,-1.6863686426676143
+negative,opposes_class,12,text__excellent,-1.6664409194351364
+negative,opposes_class,13,text__not bad,-1.6254427334558552
+negative,opposes_class,14,text__and add,-1.6106536724609244
+negative,opposes_class,15,text__problem is,-1.6004255647551313
+negative,opposes_class,16,text__helpful and,-1.5709230894027724
+negative,opposes_class,17,text__until the,-1.5212674396711623
+negative,opposes_class,18,text__only problem,-1.5099288667350055
+negative,opposes_class,19,text__is great,-1.5044182234255306
+negative,opposes_class,20,text__my issue,-1.489278882098993
+neutral,supports_class,1,text__people who,3.160110828986059
+neutral,supports_class,2,text__ratingmention but,2.816636310122806
+neutral,supports_class,3,text__positive,2.805655604224504
+neutral,supports_class,4,text__removing,2.765320802235642
+neutral,supports_class,5,text__nothing is,2.666036785833506
+neutral,supports_class,6,text__account my,2.6576795448237176
+neutral,supports_class,7,text__as much,2.6438015551254717
+neutral,supports_class,8,text__and app,2.611824242599357
+neutral,supports_class,9,text__videos it,2.609769494442291
+neutral,supports_class,10,text__other than,2.585639738771289
+neutral,supports_class,11,text__offer,2.567274013230176
+neutral,supports_class,12,text__videos but,2.5632449935842865
+neutral,supports_class,13,text__system is,2.54778752264081
+neutral,supports_class,14,text__still get,2.497982516487718
+neutral,supports_class,15,text__my netflix,2.49004843439769
+neutral,supports_class,16,text__on android,2.4484461445536794
+neutral,supports_class,17,text__to spend,2.4300816482727727
+neutral,supports_class,18,text__said it,2.4220833452423522
+neutral,supports_class,19,text__is bad,2.42194608295053
+neutral,supports_class,20,text__why are,2.421865284641829
+neutral,opposes_class,1,text__were,-3.468475326221289
+neutral,opposes_class,2,text__what is,-2.808145466124665
+neutral,opposes_class,3,text__couldn,-2.67539873783662
+neutral,opposes_class,4,text__the price,-2.394809064872599
+neutral,opposes_class,5,text__car,-2.3652518685654176
+neutral,opposes_class,6,text__di,-2.312750376935234
+neutral,opposes_class,7,text__but sometimes,-2.292379487730195
+neutral,opposes_class,8,text__you are,-2.2245901822475367
+neutral,opposes_class,9,text__not to,-2.214148221613227
+neutral,opposes_class,10,text__que,-2.2074178686222172
+neutral,opposes_class,11,text__company,-2.192505764551191
+neutral,opposes_class,12,text__una,-2.186939852167905
+neutral,opposes_class,13,text__moving,-2.181056465360444
+neutral,opposes_class,14,text__but no,-2.1598983382799797
+neutral,opposes_class,15,text__devices,-2.1472770321932946
+neutral,opposes_class,16,text__id,-2.138427307592217
+neutral,opposes_class,17,text__part of,-2.134990639114648
+neutral,opposes_class,18,text__has become,-2.1201381452101544
+neutral,opposes_class,19,text__android auto,-2.1189757723177487
+neutral,opposes_class,20,text__hour,-2.1068188385973237
+positive,supports_class,1,text__perfect,1.722790212584539
+positive,supports_class,2,text__hai to,1.6303822898786042
+positive,supports_class,3,text__no ads,1.5771913758468892
+positive,supports_class,4,text__fantastic,1.5564054417521496
+positive,supports_class,5,text__good to,1.5138610111794253
+positive,supports_class,6,text__they should,1.472576301612429
+positive,supports_class,7,text__love spotify,1.437233904525346
+positive,supports_class,8,text__dramas,1.4286691276847154
+positive,supports_class,9,text__traffic,1.4128743912662642
+positive,supports_class,10,text__foryou,1.3728499021008345
+positive,supports_class,11,text__love how,1.3715490301798454
+positive,supports_class,12,text__quickly,1.3614886577386112
+positive,supports_class,13,text__10 10,1.3169395850022068
+positive,supports_class,14,text__easy to,1.3011352617931453
+positive,supports_class,15,text__developer,1.2895898472195242
+positive,supports_class,16,text__fun,1.2815144726290775
+positive,supports_class,17,text__problem is,1.270902627315996
+positive,supports_class,18,text__finally,1.2604736306026334
+positive,supports_class,19,text__time the,1.2455836062360335
+positive,supports_class,20,text__to upload,1.240980812486697
+positive,opposes_class,1,text__worst,-2.344618608467594
+positive,opposes_class,2,text__horrible,-2.3362779941645084
+positive,opposes_class,3,text__not,-1.9596323829505493
+positive,opposes_class,4,text__worse,-1.8286596692929105
+positive,opposes_class,5,text__garbage,-1.8031089167257566
+positive,opposes_class,6,text__be really,-1.7902412294868912
+positive,opposes_class,7,text__trash,-1.7244598577090642
+positive,opposes_class,8,text__cant,-1.6444287727091054
+positive,opposes_class,9,text__unfair,-1.6218675733251962
+positive,opposes_class,10,text__fake,-1.6176039064834455
+positive,opposes_class,11,text__terrible,-1.6155650081510335
+positive,opposes_class,12,text__aren,-1.5981673199932511
+positive,opposes_class,13,text__took,-1.559602993115791
+positive,opposes_class,14,text__disgusting,-1.5509412291294664
+positive,opposes_class,15,text__removed,-1.5483921108830183
+positive,opposes_class,16,text__stupid,-1.5363439285921798
+positive,opposes_class,17,text__suddenly,-1.5350016043909727
+positive,opposes_class,18,text__used to,-1.5247705812529575
+positive,opposes_class,19,text__stop,-1.5181248120490358
+positive,opposes_class,20,text__ridiculous,-1.5117825085825247

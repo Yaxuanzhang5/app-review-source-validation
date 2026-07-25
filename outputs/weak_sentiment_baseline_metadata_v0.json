@@ -1,0 +1,41 @@
+{
+  "generated_at_utc": "2026-07-25T19:49:35.603818+00:00",
+  "project_stage": "rating_derived_weak_sentiment_baseline_v0",
+  "scope": "exploratory_not_production",
+  "source_file": "review_features_v0.csv",
+  "source_sha256": "7e65a3d282b7121012a940c931bed0a10f32ebf83d8744d1021545dbb87fe2fc",
+  "source_rows": 34601,
+  "apps": 10,
+  "weak_label_mapping": {
+    "1-2": "negative",
+    "3": "neutral",
+    "4-5": "positive"
+  },
+  "weak_label_warning": "Labels are derived from ratings and are not manually verified sentiment labels.",
+  "random_state": 42,
+  "split_method": "first holdout fold from StratifiedGroupKFold(n_splits=5)",
+  "group_definition": "SHA-256 of normalized cleaned review text",
+  "train_rows": 27681,
+  "test_rows": 6920,
+  "train_test_text_group_overlap": 0,
+  "rating_mention_redacted_rows": 415,
+  "model": {
+    "name": "LinearSVC",
+    "C": 1.0,
+    "class_weight": "balanced",
+    "hyperparameter_search": false,
+    "text_features": "TF-IDF word unigrams and bigrams",
+    "max_tfidf_features": 6000,
+    "app_identity_used_as_model_input": false,
+    "developer_reply_used_as_model_input": false,
+    "rating_fields_used_as_model_input": false
+  },
+  "evaluation": {
+    "accuracy": 0.8208092485549133,
+    "balanced_accuracy": 0.5867184442494217,
+    "macro_f1": 0.5898858850971797,
+    "weighted_f1": 0.8196257837914523
+  },
+  "validation_checks_passed": 16,
+  "validation_checks_failed": 0
+}

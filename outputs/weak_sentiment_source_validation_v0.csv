@@ -1,0 +1,12 @@
+check,result,value
+input_file_exists,True,/mnt/data/google_play_weak_sentiment_baseline_v0_complete_github_package/outputs/review_features_v0.csv
+input_file_size_bytes,True,15447118
+input_sha256,True,7e65a3d282b7121012a940c931bed0a10f32ebf83d8744d1021545dbb87fe2fc
+expected_row_count_34601,True,34601
+all_required_columns_present,True,none
+review_key_complete,True,0
+review_key_unique,True,0
+score_complete,True,0
+score_domain_1_to_5,True,"[1, 2, 3, 4, 5]"
+ten_apps_present,True,10
+no_duplicate_identity_flags,True,0
