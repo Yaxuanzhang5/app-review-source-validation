@@ -6,7 +6,7 @@ This repository documents the design and validation of a recurring public app-re
 
 Google Play was selected as the primary source for the first recurring-ingestion pilot because it provided the most consistent combination of review volume, core metadata, pagination behavior, and repeated-collection feasibility under the tested setup.
 
-The current pipeline stores raw review records, cleaned review text, ingestion-run history, app-level run summaries, and quality flags in SQLite. The newest project layer creates transparent review-level features and app-level aggregates from the validated cleaned data. It does **not** train a sentiment model, topic model, issue classifier, or other machine-learning model.
+The current pipeline stores raw review records, cleaned review text, ingestion-run history, app-level run summaries, and quality flags in SQLite. The feature-engineering layer creates transparent review-level features and app-level aggregates from validated cleaned data. The newest downstream layer adds an exploratory rating-derived weak-sentiment baseline with strict rating-field leakage controls. It is not a production sentiment system.
 
 ## Current project status
 
@@ -22,6 +22,7 @@ The following stages are complete:
 8. Automated ingestion monitoring layer
 9. Monitoring-threshold calibration and operational response documentation
 10. Lightweight review feature engineering v0
+11. Rating-derived weak sentiment baseline v0
 
 The current operating workflow is:
 
@@ -36,7 +37,9 @@ failing: stop downstream use, correct the failure, and rerun
         ↓
 feature generation from validated cleaned reviews
         ↓
-EDA and later model-design work
+weak-label EDA and leakage-controlled linear baseline
+        ↓
+error analysis and later model-design work
 ```
 
 The current operating recommendation is:
@@ -644,7 +647,9 @@ The feature notebook uses Python, pandas, NumPy, SQLite, and the standard librar
 10. Feature Engineering v0 preserves all 34,601 validated cleaned reviews and creates 37 transparent fields plus 10 app-level summaries.
 11. Identifiers, ratings, timestamps, text length, reply presence, and deduplication guards are the strongest current features.
 12. Language and keyword issue indicators are documented heuristics for screening and EDA, not ground-truth labels.
-13. The project is now ready for additional normal operating runs, continued monitoring, gradual threshold recalibration, deeper EDA, and careful design of later modeling work.
+13. The rating-derived weak-sentiment baseline creates a leakage-controlled modeling-ready dataset and a transparent linear reference model.
+14. Neutral-class performance remains limited, so label quality and class imbalance should be reviewed before any more complex NLP work.
+15. The project is now ready for additional normal operating runs, continued monitoring, error analysis, gradual threshold recalibration, and careful design of later modeling work.
 
 ## Limitations
 
@@ -662,7 +667,7 @@ The feature notebook uses Python, pandas, NumPy, SQLite, and the standard librar
 - The language heuristic is conservative and intentionally leaves many short or unclear reviews as `undetermined`.
 - Keyword issue indicators can produce both false matches and missed issues because they do not fully interpret context, negation, spelling variation, or non-English wording.
 - App-level feature aggregates describe the collected database snapshot and should not be interpreted as general app-quality rankings.
-- No sentiment, topic, or issue model has been trained or evaluated in this project stage.
+- The weak-sentiment model is an exploratory linear baseline using rating-derived labels; it is not a production model and does not establish ground-truth sentiment.
 
 ## Recommended next steps
 
@@ -674,3 +679,81 @@ The feature notebook uses Python, pandas, NumPy, SQLite, and the standard librar
 6. Use the v0 features for EDA, including rating distributions, text-length patterns, reply availability, language coverage, and issue-keyword screening.
 7. Inspect false positives and false negatives before expanding the language or issue heuristics.
 8. Define modeling targets and evaluation plans before beginning sentiment, topic, or issue-classification work.
+
+## Rating-derived weak sentiment baseline v0
+
+### Objective
+
+This downstream exploratory layer uses the validated `review_features_v0.csv` table to derive weak sentiment labels from source ratings:
+
+- 1–2 stars: `negative`
+- 3 stars: `neutral`
+- 4–5 stars: `positive`
+
+The labels are weak labels and are not manually verified sentiment annotations.
+
+### Leakage controls
+
+The model excludes `score`, `rating_group`, and `low_rating_flag`. It also excludes app identity, developer-reply availability, collection dates, run IDs, app versions, and source-lag fields from model inputs. Exact normalized text groups are assigned to only one data split, and explicit written star-rating expressions are replaced with a generic token before modeling.
+
+### Data and class distribution
+
+- 34,601 review rows
+- 10 apps
+- 27,681 training rows
+- 6,920 test rows
+- negative: 9,948 (28.75%)
+- neutral: 1,629 (4.71%)
+- positive: 23,024 (66.54%)
+- exact normalized-text overlap between train and test: 0
+
+### Exploratory feature patterns
+
+Negative reviews are longer and more likely to match issue-keyword indicators. Positive reviews are more likely to be short, low-signal, or repeated. These are descriptive patterns in the current snapshot rather than causal conclusions.
+
+### Baseline model
+
+A class-weighted linear support vector classifier uses TF-IDF word unigrams and bigrams plus selected deterministic review features. The model uses fixed `C=1.0` and no hyperparameter search.
+
+| Model | Accuracy | Balanced accuracy | Macro F1 | Weighted F1 |
+|---|---:|---:|---:|---:|
+| Majority-class reference | 0.6655 | 0.3333 | 0.2664 | 0.5318 |
+| Class-weighted LinearSVC | 0.8208 | 0.5867 | 0.5899 | 0.8196 |
+
+The model performs substantially better than the majority-class reference on balanced accuracy and macro F1. Neutral-class performance remains limited because three-star reviews are rare and may express mixed sentiment.
+
+### Main outputs
+
+```text
+notebooks/
+└── Google_Play_Weak_Sentiment_Baseline_v0.ipynb
+
+outputs/
+├── modeling_ready_weak_sentiment_v0.csv
+├── weak_sentiment_source_validation_v0.csv
+├── weak_sentiment_class_distribution_v0.csv
+├── weak_sentiment_feature_patterns_v0.csv
+├── weak_sentiment_issue_patterns_v0.csv
+├── weak_sentiment_app_distribution_v0.csv
+├── weak_sentiment_model_metrics_v0.csv
+├── weak_sentiment_classification_report_v0.csv
+├── weak_sentiment_confusion_matrix_v0.csv
+├── weak_sentiment_top_coefficients_v0.csv
+├── weak_sentiment_test_predictions_sample_v0.csv
+├── weak_sentiment_validation_checks_v0.csv
+├── weak_sentiment_baseline_metadata_v0.json
+└── weak_sentiment_output_manifest_v0.csv
+
+reports/
+├── figures/
+│   ├── weak_sentiment_class_distribution_v0.png
+│   ├── weak_sentiment_feature_patterns_v0.png
+│   └── weak_sentiment_confusion_matrix_v0.png
+├── google_play_weak_sentiment_baseline_v0_report.md
+├── weak_sentiment_baseline_v0_model_card.md
+└── README_weak_sentiment_baseline_v0_update.md
+```
+
+### Limitations
+
+This is an exploratory baseline, not a production system. Ratings are weak labels, the neutral class is small, text and rating can disagree, heuristic fields can be noisy, and cross-app or future-time generalization has not been established.
