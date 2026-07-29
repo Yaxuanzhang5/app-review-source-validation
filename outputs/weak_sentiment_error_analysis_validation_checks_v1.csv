@@ -1,0 +1,24 @@
+check,status,passed,observed
+merged_rows_equal_34601,passed,True,34601
+baseline_train_rows_equal_27681,passed,True,27681
+baseline_test_rows_equal_6920,passed,True,6920
+baseline_text_group_overlap_zero,passed,True,0
+reproduced_baseline_accuracy,passed,True,0.8208092485549133
+reproduced_baseline_balanced_accuracy,passed,True,0.5867184442494217
+reproduced_baseline_macro_f1,passed,True,0.5898858850971797
+reproduced_baseline_weighted_f1,passed,True,0.8196257837914523
+baseline_error_count_equal_1240,passed,True,1240
+manual_sample_rows_equal_120,passed,True,120
+manual_sample_review_keys_unique,passed,True,0
+manual_core_has_30_per_weak_label,passed,True,"{'negative': 30, 'neutral': 30, 'positive': 30}"
+manual_extra_neutral_rows_equal_30,passed,True,30
+manual_annotations_complete,passed,True,0
+manual_annotation_review_keys_match_sample,passed,True,120
+heldout_apps_absent_from_strict_training,passed,True,[]
+strict_holdout_text_group_overlap_zero,passed,True,0
+strict_holdout_training_apps_equal_8,passed,True,8
+strict_holdout_test_rows_equal_7794,passed,True,7794
+all_labels_present_in_strict_holdout_train,passed,True,"['negative', 'neutral', 'positive']"
+all_labels_present_in_strict_holdout_test,passed,True,"['negative', 'neutral', 'positive']"
+strict_holdout_confusion_total_matches_test,passed,True,7794
+all_reported_metrics_finite,passed,True,finite

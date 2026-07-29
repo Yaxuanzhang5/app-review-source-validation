@@ -1,0 +1,14 @@
+weak_sentiment_label,manual_text_category,review_count
+negative,mixed,5
+negative,negative,17
+negative,positive,2
+negative,unclear,6
+neutral,mixed,13
+neutral,negative,21
+neutral,positive,19
+neutral,unclear,7
+positive,mixed,5
+positive,negative,7
+positive,neutral,3
+positive,positive,10
+positive,unclear,5

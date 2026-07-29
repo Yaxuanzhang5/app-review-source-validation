@@ -1,0 +1,62 @@
+{
+  "generated_at_utc": "2026-07-28T23:03:56.591483+00:00",
+  "project_stage": "weak_sentiment_error_analysis_and_transfer_v1",
+  "scope": "exploratory_not_production",
+  "source_rows": 34601,
+  "apps": 10,
+  "random_state": 42,
+  "baseline_split": {
+    "train_rows": 27681,
+    "test_rows": 6920,
+    "text_group_overlap": 0
+  },
+  "manual_review": {
+    "baseline_errors": 1240,
+    "reviewed_rows": 120,
+    "balanced_core_rows": 90,
+    "balanced_core_rows_per_weak_label": 30,
+    "additional_neutral_rows": 30,
+    "reviewers": 1,
+    "adjudication": false,
+    "primary_categories": [
+      "neutral",
+      "mixed",
+      "positive",
+      "negative",
+      "unclear",
+      "inconsistent_with_rating"
+    ],
+    "sampling_warning": "Counts describe a direction-balanced and app-balanced error sample and are not population estimates."
+  },
+  "feature_comparison": {
+    "tfidf_only_macro_f1": 0.5892284407927808,
+    "full_feature_macro_f1": 0.5898858850971797,
+    "macro_f1_delta_full_minus_tfidf": 0.0006574443043988465,
+    "tfidf_only_neutral_f1": 0.11026033690658499,
+    "full_feature_neutral_f1": 0.11455108359133127,
+    "neutral_f1_delta_full_minus_tfidf": 0.0042907466847462855
+  },
+  "strict_two_app_holdout": {
+    "held_out_apps": [
+      "YouTube",
+      "DoorDash"
+    ],
+    "training_apps": 8,
+    "training_rows": 20749,
+    "test_rows": 7794,
+    "training_rows_removed_for_shared_text": 6058,
+    "train_test_text_group_overlap": 0,
+    "accuracy": 0.775340005132153,
+    "balanced_accuracy": 0.5569528643426881,
+    "macro_f1": 0.5611453076744742,
+    "weighted_f1": 0.772470489625086,
+    "neutral_f1": 0.10432569974554708
+  },
+  "recommended_priority": [
+    "label_design",
+    "evaluation_setup",
+    "feature_design"
+  ],
+  "validation_checks_passed": 23,
+  "validation_checks_failed": 0
+}

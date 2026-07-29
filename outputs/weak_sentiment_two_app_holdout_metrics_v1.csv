@@ -1,0 +1,3 @@
+experiment,model,accuracy,balanced_accuracy,macro_f1,weighted_f1,test_rows
+two_app_holdout,strict_app_and_text_group_holdout,0.775340005132153,0.5569528643426881,0.5611453076744742,0.772470489625086,7794
+two_app_holdout_sensitivity,app_only_holdout_with_disclosed_text_overlap,0.7711059789581729,0.5564851656854511,0.5598159860247017,0.7697477744095919,7794

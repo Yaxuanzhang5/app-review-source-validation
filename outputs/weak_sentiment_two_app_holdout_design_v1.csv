@@ -1,0 +1,3 @@
+design,training_apps,training_rows,test_apps,test_rows,shared_text_groups,training_rows_removed_for_shared_text,test_rows_in_shared_text_groups
+strict_app_and_text_group_holdout,8,20749,2,7794,0,6058,0
+app_only_holdout_with_disclosed_text_overlap,8,26807,2,7794,415,0,1913

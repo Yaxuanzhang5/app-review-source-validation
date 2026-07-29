@@ -1,0 +1,12 @@
+weak_sentiment_label,rating_consistency,review_count
+negative,consistent,17
+negative,inconsistent,2
+negative,partially_inconsistent,5
+negative,unclear,6
+neutral,consistent,13
+neutral,inconsistent,40
+neutral,unclear,7
+positive,consistent,10
+positive,inconsistent,10
+positive,partially_inconsistent,5
+positive,unclear,5

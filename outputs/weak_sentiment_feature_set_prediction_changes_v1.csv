@@ -1,0 +1,8 @@
+measure,value
+prediction_agreement_count,6829.0
+prediction_agreement_rate,0.986849710982659
+predictions_changed,91.0
+both_models_correct,5646.0
+full_features_only_correct,34.0
+tfidf_only_correct,36.0
+both_models_wrong,1204.0

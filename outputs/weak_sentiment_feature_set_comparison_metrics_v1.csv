@@ -1,0 +1,3 @@
+experiment,model,accuracy,balanced_accuracy,macro_f1,weighted_f1,test_rows
+same_grouped_split,tfidf_only,0.8210982658959538,0.5859099584897959,0.5892284407927808,0.8202254386359362,6920
+same_grouped_split,tfidf_plus_engineered_features,0.8208092485549133,0.5867184442494217,0.5898858850971797,0.8196257837914523,6920
