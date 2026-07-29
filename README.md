@@ -6,7 +6,7 @@ This repository documents the design and validation of a recurring public app-re
 
 Google Play was selected as the primary source for the first recurring-ingestion pilot because it provided the most consistent combination of review volume, core metadata, pagination behavior, and repeated-collection feasibility under the tested setup.
 
-The current pipeline stores raw review records, cleaned review text, ingestion-run history, app-level run summaries, and quality flags in SQLite. The feature-engineering layer creates transparent review-level features and app-level aggregates from validated cleaned data. The newest downstream layer adds an exploratory rating-derived weak-sentiment baseline with strict rating-field leakage controls. It is not a production sentiment system.
+The current pipeline stores raw review records, cleaned review text, ingestion-run history, app-level run summaries, and quality flags in SQLite. The feature-engineering layer creates transparent review-level features and app-level aggregates from validated cleaned data. The newest downstream phase diagnoses the rating-derived weak-sentiment baseline through manual error review, a controlled feature-set comparison, and strict cross-app transfer testing. It remains exploratory and is not a production sentiment system.
 
 ## Current project status
 
@@ -23,6 +23,7 @@ The following stages are complete:
 9. Monitoring-threshold calibration and operational response documentation
 10. Lightweight review feature engineering v0
 11. Rating-derived weak sentiment baseline v0
+12. Weak sentiment error analysis and cross-app transfer v1
 
 The current operating workflow is:
 
@@ -39,7 +40,11 @@ feature generation from validated cleaned reviews
         ↓
 weak-label EDA and leakage-controlled linear baseline
         ↓
-error analysis and later model-design work
+manual error review and controlled feature comparison
+        ↓
+strict app-heldout transfer evaluation
+        ↓
+label and evaluation redesign before later model work
 ```
 
 The current operating recommendation is:
@@ -570,7 +575,9 @@ app-review-source-validation/
 ├── notebooks/
 │   ├── Google_Play_Ingestion_Monitoring_Layer.ipynb
 │   ├── Google_Play_Monitoring_Threshold_Calibration.ipynb
-│   └── Google_Play_Review_Feature_Engineering_v0.ipynb
+│   ├── Google_Play_Review_Feature_Engineering_v0.ipynb
+│   ├── Google_Play_Weak_Sentiment_Baseline_v0.ipynb
+│   └── Google_Play_Weak_Sentiment_Error_Analysis_v1.ipynb
 ├── outputs/
 │   ├── monitoring_*.csv
 │   ├── monitoring_*.json
@@ -585,7 +592,9 @@ app-review-source-validation/
 │   ├── feature_engineering_source_validation_v0.csv
 │   ├── feature_issue_indicator_rates_v0.csv
 │   ├── feature_engineering_metadata_v0.json
-│   └── feature_engineering_output_manifest_v0.csv
+│   ├── feature_engineering_output_manifest_v0.csv
+│   ├── modeling_ready_weak_sentiment_v0.csv
+│   └── weak_sentiment_*.csv / *.json
 └── reports/
     ├── phase2_cadence_runA_runB_final_report.md
     ├── google_play_ingestion_monitoring_report.md
@@ -594,7 +603,8 @@ app-review-source-validation/
     ├── monitoring_operations_guide.md
     ├── google_play_feature_engineering_v0_report.md
     ├── feature_engineering_v0_feature_dictionary.md
-    └── README_feature_engineering_v0_update.md
+    ├── google_play_weak_sentiment_baseline_v0_report.md
+    └── google_play_weak_sentiment_error_analysis_v1_report.md
 ```
 
 ## Reproduction instructions
@@ -648,8 +658,10 @@ The feature notebook uses Python, pandas, NumPy, SQLite, and the standard librar
 11. Identifiers, ratings, timestamps, text length, reply presence, and deduplication guards are the strongest current features.
 12. Language and keyword issue indicators are documented heuristics for screening and EDA, not ground-truth labels.
 13. The rating-derived weak-sentiment baseline creates a leakage-controlled modeling-ready dataset and a transparent linear reference model.
-14. Neutral-class performance remains limited, so label quality and class imbalance should be reviewed before any more complex NLP work.
-15. The project is now ready for additional normal operating runs, continued monitoring, error analysis, gradual threshold recalibration, and careful design of later modeling work.
+14. Manual review confirms that three-star baseline errors are usually positive, negative, mixed, unclear, or inconsistent with the rating rather than cleanly neutral.
+15. The current engineered features do not materially outperform TF-IDF alone on the controlled grouped split.
+16. Strictly holding out YouTube and DoorDash produces a meaningful transfer decline and different per-app results.
+17. The next modeling priority is label design first, evaluation setup second, and feature design third; a more complex model is not yet justified.
 
 ## Limitations
 
@@ -677,8 +689,9 @@ The feature notebook uses Python, pandas, NumPy, SQLite, and the standard librar
 4. Refresh the feature layer only from validated usable runs.
 5. Accumulate a larger routine-run baseline and recalibrate the monitoring thresholds.
 6. Use the v0 features for EDA, including rating distributions, text-length patterns, reply availability, language coverage, and issue-keyword screening.
-7. Inspect false positives and false negatives before expanding the language or issue heuristics.
-8. Define modeling targets and evaluation plans before beginning sentiment, topic, or issue-classification work.
+7. Keep source rating, manually reviewed text sentiment, and rating-text consistency as separate fields in the next validation set.
+8. Retain both grouped same-distribution and app-heldout evaluation with per-class and per-app metrics.
+9. Do not move to a more complex sentiment model until the label and evaluation redesign is complete.
 
 ## Rating-derived weak sentiment baseline v0
 
@@ -757,3 +770,68 @@ reports/
 ### Limitations
 
 This is an exploratory baseline, not a production system. Ratings are weak labels, the neutral class is small, text and rating can disagree, heuristic fields can be noisy, and cross-app or future-time generalization has not been established.
+
+## Weak sentiment error analysis and cross-app transfer v1
+
+### Scope
+
+This phase diagnoses the rating-derived weak-sentiment baseline without tuning for a higher headline score. It includes:
+
+- a 120-row manual review of baseline errors with additional three-star coverage;
+- TF-IDF-only versus TF-IDF plus current engineered features on the same grouped split; and
+- a strict two-app holdout using YouTube and DoorDash with zero exact text-group overlap.
+
+### Main findings
+
+1. In the 60 reviewed three-star errors, 40 were categorized as inconsistent with the rating-derived neutral label, 13 as mixed, 7 as unclear, and 0 as cleanly neutral.
+2. The current engineered features changed macro F1 from 0.5892 to 0.5899 and neutral F1 from 0.1103 to 0.1146. This is not a material overall gain.
+3. Strictly holding out YouTube and DoorDash reduced macro F1 from 0.5899 to 0.5611. YouTube and DoorDash also produced different app-level results.
+4. The recommended priority is label design first, evaluation setup second, and feature design third.
+5. A more complex model is not recommended until a manually labeled validation set separates star rating, text sentiment, and rating-text consistency.
+
+### Main files
+
+```text
+inputs/
+└── manual_error_annotations_v1.csv
+
+notebooks/
+└── Google_Play_Weak_Sentiment_Error_Analysis_v1.ipynb
+
+outputs/
+├── weak_sentiment_error_analysis_source_validation_v1.csv
+├── weak_sentiment_feature_set_comparison_metrics_v1.csv
+├── weak_sentiment_feature_set_class_metrics_v1.csv
+├── weak_sentiment_feature_set_prediction_changes_v1.csv
+├── weak_sentiment_manual_error_review_v1.csv
+├── weak_sentiment_manual_error_category_summary_v1.csv
+├── weak_sentiment_manual_error_by_weak_label_v1.csv
+├── weak_sentiment_manual_text_by_weak_label_v1.csv
+├── weak_sentiment_manual_rating_consistency_v1.csv
+├── weak_sentiment_manual_error_by_direction_v1.csv
+├── weak_sentiment_two_app_holdout_design_v1.csv
+├── weak_sentiment_two_app_holdout_metrics_v1.csv
+├── weak_sentiment_two_app_holdout_class_metrics_v1.csv
+├── weak_sentiment_two_app_holdout_per_app_metrics_v1.csv
+├── weak_sentiment_two_app_holdout_per_app_class_metrics_v1.csv
+├── weak_sentiment_two_app_holdout_confusion_matrix_v1.csv
+├── weak_sentiment_error_analysis_validation_checks_v1.csv
+├── weak_sentiment_error_analysis_metadata_v1.json
+└── weak_sentiment_error_analysis_output_manifest_v1.csv
+
+reports/
+├── google_play_weak_sentiment_error_analysis_v1_report.md
+└── README_weak_sentiment_error_analysis_v1_update.md
+```
+
+### Reproduction
+
+1. Keep `outputs/modeling_ready_weak_sentiment_v0.csv` and `outputs/review_features_v0.csv` in the repository.
+2. Keep `inputs/manual_error_annotations_v1.csv` in the repository.
+3. Open `notebooks/Google_Play_Weak_Sentiment_Error_Analysis_v1.ipynb`.
+4. Run all cells in order.
+5. The notebook verifies the upstream file hashes, reproduces the prior full-feature baseline, recreates the deterministic error sample, joins the fixed manual annotations, runs both feature-set models, runs the two-app holdout, validates every result, and regenerates the CSV, JSON, and Markdown deliverables.
+
+### Interpretation guardrail
+
+Manual category counts describe the designed error sample and are not estimates for all reviews. This remains exploratory work and is not a production sentiment system.
